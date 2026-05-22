@@ -1749,7 +1749,7 @@ async function exportReportImage() {
             </style>
           </head>
           <body>
-            <p>Tekan lama pada gambar → "Simpan Gambar" untuk menyimpan ke galeri</p>
+            <p>Tekan lama pada gambar → "Simpan Gambar" untuk menyimpan ke galeri, atau bisa langsung bagikan/salin</p>
             <img src="${dataUrl}" alt="${filename}">
           </body>
           </html>
