@@ -18,7 +18,6 @@ const MANTRI_PN = {
   "M FIRMAN MAULANI":     "00350384",
   // Binuang
   "AKMAL FIRDAUS":        "00305893",
-  "ARIF RAHMAN":          "00139338",
   "M SYAMSU RIZAL":       "00363597",
   "RUDI HARTONO":         "00282614",
   "ACHMAD RIZKYANNOOR":   "00189669",
@@ -92,7 +91,6 @@ const UNITS = {
       loans: ["KUR"],
       mantri: [
         { name: "AKMAL FIRDAUS", customers: [] },
-        { name: "ARIF RAHMAN", customers: [] },
         { name: "M SYAMSU RIZAL", customers: [] },
         { name: "RUDI HARTONO", customers: [] },
         { name: "ACHMAD RIZKYANNOOR", customers: [] },
