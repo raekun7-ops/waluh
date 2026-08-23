@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Angsuran & Potongan Pinjaman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --ink:#122C34;
+    --ink-soft:#2C4A54;
+    --paper:#FAF7F0;
+    --paper-dim:#F1ECE0;
+    --gold:#C89B3C;
+    --gold-soft:#E9D9A8;
+    --line:#D8D0BC;
+    --green:#2F6F4E;
+    --red:#A6432F;
+    --muted:#7C8A88;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(200,155,60,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(200,155,60,0.06), transparent 45%);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:40px 20px 60px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+  header{
+    text-align:center;
+    margin-bottom:28px;
+    color:var(--paper);
+  }
+  header .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold-soft);
+    margin-bottom:10px;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:#B9C6C4;
+    font-size:14.5px;
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  /* TABS */
+  .tabbar{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .tab-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:11px 26px;
+    border-radius:999px;
+    border:1.5px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.04);
+    color:#B9C6C4;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .tab-btn:hover{border-color:rgba(200,155,60,0.5);color:var(--paper);}
+  .tab-btn.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--ink);
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1.05fr;
+    gap:0;
+    background:var(--paper);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  }
+  @media (max-width:800px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{padding:38px 36px;}
+  .panel-form{
+    background:var(--paper);
+    border-right:1px dashed var(--line);
+  }
+  @media (max-width:800px){
+    .panel-form{border-right:none;border-bottom:1px dashed var(--line);}
+  }
+
+  .section-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:7px;
+  }
+  .field .hint{
+    font-size:11.5px;
+    color:var(--muted);
+    font-weight:400;
+    display:block;
+    margin-top:4px;
+  }
+  .input-shell{
+    display:flex;
+    align-items:center;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    padding:0 4px 0 14px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .input-shell:focus-within{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(200,155,60,0.15);
+  }
+  .input-shell.readonly{
+    background:var(--paper-dim);
+  }
+  .input-shell .prefix{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+    margin-right:6px;
+  }
+  .input-shell input{
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15.5px;
+    padding:11px 8px;
+    width:100%;
+    color:var(--ink);
+  }
+  .input-shell input[readonly]{color:var(--ink-soft);}
+  .input-shell .suffix{
+    font-size:12.5px;
+    color:var(--muted);
+    padding-right:10px;
+    white-space:nowrap;
+  }
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:480px){.row2{grid-template-columns:1fr;}}
+
+  .divider-note{
+    margin:26px 0 22px;
+    padding:12px 14px;
+    background:var(--paper-dim);
+    border-left:3px solid var(--gold);
+    border-radius:6px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+  }
+
+  /* RECEIPT PANEL */
+  .panel-receipt{
+    background:var(--ink);
+    color:var(--paper);
+    position:relative;
+  }
+  .receipt-head{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:22px;
+    padding-bottom:14px;
+    border-bottom:1px dashed rgba(255,255,255,0.2);
+  }
+
+  .hero-number{
+    text-align:center;
+    padding:6px 0 26px;
+  }
+  .hero-number .label{
+    font-size:12px;
+    color:#9FB0AE;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .hero-number .value{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(30px,4.2vw,44px);
+    color:var(--gold-soft);
+    letter-spacing:-0.01em;
+  }
+  .hero-number .sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:#8FA19F;
+    margin-top:6px;
+  }
+
+  .ledger{
+    border-top:1px dashed rgba(255,255,255,0.2);
+    padding-top:6px;
+  }
+  .ledger-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:9px 0;
+    font-size:13.5px;
+    border-bottom:1px dotted rgba(255,255,255,0.12);
+  }
+  .ledger-row .l{color:#C7D2CF;}
+  .ledger-row .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;
+    color:var(--paper);
+  }
+  .ledger-row.deduct .r{color:#E8A98F;}
+  .ledger-row.deduct .r::before{content:"– ";}
+  .ledger-row.total{
+    margin-top:8px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.25);
+    border-bottom:none;
+  }
+  .ledger-row.total .l{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--paper);
+  }
+  .ledger-row.total .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:17px;
+    font-weight:600;
+    color:#8FE0B4;
+  }
+  .ledger-row.final .r{
+    font-size:20px;
+    color:var(--gold-soft);
+  }
+
+  .info-box{
+    margin-top:18px;
+    padding:14px 16px;
+    background:rgba(200,155,60,0.1);
+    border:1px dashed rgba(200,155,60,0.4);
+    border-radius:8px;
+  }
+  .info-box .info-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    margin-bottom:6px;
+  }
+  .info-box .info-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13.5px;
+  }
+  .info-box .info-row .l{color:#C7D2CF;}
+  .info-box .info-row .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--gold-soft);
+  }
+  .info-box .info-note{
+    font-size:11px;
+    color:#8FA19F;
+    margin-top:6px;
+    line-height:1.5;
+  }
+
+  .receipt-foot{
+    margin-top:26px;
+    padding-top:16px;
+    border-top:1px dashed rgba(255,255,255,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  .foot-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    white-space:nowrap;
+  }
+  .foot-item .foot-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#7E9290;
+  }
+  .foot-item .foot-value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+    color:var(--gold-soft);
+  }
+  .foot-divider{
+    width:1px;
+    height:26px;
+    background:rgba(255,255,255,0.15);
+  }
+
+  .save-btn{
+    margin-top:22px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:13px 16px;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    border-radius:9px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.01em;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+  }
+  .save-btn:hover{background:var(--gold-soft);}
+  .save-btn:active{transform:scale(0.98);}
+  .save-btn svg{width:16px;height:16px;flex-shrink:0;}
+  .save-btn.saving{opacity:.7;cursor:progress;}
+
+  footer{
+    text-align:center;
+    color:#7E9290;
+    font-size:12px;
+    margin-top:22px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Simulasi Kredit · Bunga Anuitas</div>
+    <h1>Kalkulator Angsuran &amp; Potongan Pinjaman</h1>
+    <p>Isi plafond, jangka waktu, dan bunga untuk menghitung angsuran bulanan secara otomatis, lalu lihat rincian potongan pencairan dan jumlah dana yang diterima.</p>
+  </header>
+
+  <div class="tabbar">
+    <button class="tab-btn active" id="tabbtn-kur" onclick="switchTab('kur')">KUR</button>
+    <button class="tab-btn" id="tabbtn-kupedes" onclick="switchTab('kupedes')">Kupedes</button>
+  </div>
+
+  <!-- ============ TAB KUR ============ -->
+  <div class="tab-panel active" id="tabpanel-kur">
+    <div class="grid">
+      <div class="panel panel-form">
+        <div class="section-label">Data Pinjaman</div>
+
+        <div class="field">
+          <label for="kur-plafond">Plafond Pinjaman</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kur-plafond" inputmode="numeric" value="100.000.000">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kur-tenor">Jangka Waktu</label>
+            <div class="input-shell">
+              <input type="number" id="kur-tenor" min="1" value="12">
+              <span class="suffix">bulan</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="kur-bunga">Bunga Anuitas</label>
+            <div class="input-shell">
+              <input type="number" id="kur-bunga" min="0" step="0.01" value="6">
+              <span class="suffix">% / tahun</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-note">
+          Angsuran dihitung otomatis pakai rumus anuitas:<br>
+          <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
+        </div>
+
+        <div class="section-label">Rincian Potongan Pencairan</div>
+
+        <div class="field">
+          <label for="kur-blokiran">Jumlah Blokiran Angsuran</label>
+          <div class="input-shell">
+            <input type="number" id="kur-blokiran" min="0" value="3">
+            <span class="suffix">x angsuran</span>
+          </div>
+          <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
+        </div>
+
+        <div class="field">
+          <label for="kur-pelunasan">Pelunasan Pinjaman Lama</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kur-pelunasan" inputmode="numeric" value="0">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kur-asuransi">Asuransi</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kur-asuransi" inputmode="numeric" value="800.000">
+            </div>
+          </div>
+          <div class="field">
+            <label for="kur-lainlain">Potongan Lain-lain</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kur-lainlain" inputmode="numeric" value="400.000">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-receipt">
+        <div id="kur-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+          <div class="receipt-head">
+            <span>Simulasi Kredit KUR</span>
+            <span id="kur-tanggal"></span>
+          </div>
+
+          <div class="hero-number">
+            <div class="label">Angsuran per Bulan</div>
+            <div class="value" id="kur-out-angsuran">Rp 0</div>
+            <div class="sub" id="kur-out-formula-sub">plafond · tenor · bunga</div>
+          </div>
+
+          <div class="ledger">
+            <div class="ledger-row">
+              <span class="l">Plafond Pinjaman</span>
+              <span class="r" id="kur-out-plafond">Rp 0</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Jangka Waktu</span>
+              <span class="r" id="kur-out-tenor">0 bulan</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Bunga Anuitas</span>
+              <span class="r" id="kur-out-bunga">0% / thn</span>
+            </div>
+
+            <div class="ledger-row deduct">
+              <span class="l">Blokiran Angsuran <span id="kur-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="r" id="kur-out-blokiran">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Pelunasan</span>
+              <span class="r" id="kur-out-pelunasan">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Asuransi</span>
+              <span class="r" id="kur-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Potongan Lain-lain</span>
+              <span class="r" id="kur-out-lainlain">Rp 0</span>
+            </div>
+
+            <div class="ledger-row total">
+              <span class="l">Total Potongan</span>
+              <span class="r" id="kur-out-totalpotongan">Rp 0</span>
+            </div>
+            <div class="ledger-row total final">
+              <span class="l">Dana Diterima Bersih</span>
+              <span class="r" id="kur-out-diterima">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="receipt-foot">
+            <div class="foot-item">
+              <span class="foot-label">Total Bayar Selama Tenor</span>
+              <span class="foot-value" id="kur-out-totalbayar">Rp 0</span>
+            </div>
+            <div class="foot-divider"></div>
+            <div class="foot-item">
+              <span class="foot-label">Total Bunga</span>
+              <span class="foot-value" id="kur-out-totalbunga">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="save-btn" id="kur-save-btn" onclick="saveAsPng('kur')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="kur-save-label">Simpan Hasil sebagai PNG</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB KUPEDES ============ -->
+  <div class="tab-panel" id="tabpanel-kupedes">
+    <div class="grid">
+      <div class="panel panel-form">
+        <div class="section-label">Data Pinjaman</div>
+
+        <div class="field">
+          <label for="kup-plafond">Plafond Pinjaman</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-plafond" inputmode="numeric" value="100.000.000">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-tenor">Jangka Waktu</label>
+            <div class="input-shell">
+              <input type="number" id="kup-tenor" min="1" value="12">
+              <span class="suffix">bulan</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="kup-bunga">Bunga Anuitas</label>
+            <div class="input-shell">
+              <input type="number" id="kup-bunga" min="0" step="0.01" value="6">
+              <span class="suffix">% / tahun</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-note">
+          Angsuran dihitung otomatis pakai rumus anuitas:<br>
+          <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
+        </div>
+
+        <div class="section-label">Rincian Potongan Pencairan</div>
+
+        <div class="field">
+          <label for="kup-blokiran">Jumlah Blokiran Angsuran</label>
+          <div class="input-shell">
+            <input type="number" id="kup-blokiran" min="0" value="3">
+            <span class="suffix">x angsuran</span>
+          </div>
+          <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
+        </div>
+
+        <div class="field">
+          <label for="kup-pelunasan">Pelunasan Pinjaman Lama</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-pelunasan" inputmode="numeric" value="0">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-asuransi">Asuransi</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-asuransi" inputmode="numeric" value="800.000">
+            </div>
+          </div>
+          <div class="field">
+            <label for="kup-lainlain">Potongan Lain-lain</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-lainlain" inputmode="numeric" value="400.000">
+            </div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-provisi">Provisi (otomatis 1%)</label>
+            <div class="input-shell readonly">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-provisi" readonly value="0">
+            </div>
+            <span class="hint">Provisi = 1% × plafond pinjaman.</span>
+          </div>
+          <div class="field">
+            <label for="kup-admin">Biaya Admin (otomatis)</label>
+            <div class="input-shell readonly">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-admin" readonly value="0">
+            </div>
+            <span class="hint">≤100jt: 100rb · &gt;100–250jt: 250rb · &gt;250jt: 500rb</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-receipt">
+        <div id="kup-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+          <div class="receipt-head">
+            <span>Simulasi Kredit Kupedes</span>
+            <span id="kup-tanggal"></span>
+          </div>
+
+          <div class="hero-number">
+            <div class="label">Angsuran per Bulan</div>
+            <div class="value" id="kup-out-angsuran">Rp 0</div>
+            <div class="sub" id="kup-out-formula-sub">plafond · tenor · bunga</div>
+          </div>
+
+          <div class="ledger">
+            <div class="ledger-row">
+              <span class="l">Plafond Pinjaman</span>
+              <span class="r" id="kup-out-plafond">Rp 0</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Jangka Waktu</span>
+              <span class="r" id="kup-out-tenor">0 bulan</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Bunga Anuitas</span>
+              <span class="r" id="kup-out-bunga">0% / thn</span>
+            </div>
+
+            <div class="ledger-row deduct">
+              <span class="l">Blokiran Angsuran <span id="kup-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="r" id="kup-out-blokiran">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Pelunasan</span>
+              <span class="r" id="kup-out-pelunasan">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Asuransi</span>
+              <span class="r" id="kup-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Potongan Lain-lain</span>
+              <span class="r" id="kup-out-lainlain">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Provisi (1%)</span>
+              <span class="r" id="kup-out-provisi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Biaya Admin</span>
+              <span class="r" id="kup-out-admin">Rp 0</span>
+            </div>
+
+            <div class="ledger-row total">
+              <span class="l">Total Potongan</span>
+              <span class="r" id="kup-out-totalpotongan">Rp 0</span>
+            </div>
+            <div class="ledger-row total final">
+              <span class="l">Dana Diterima Bersih</span>
+              <span class="r" id="kup-out-diterima">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Biaya AJKO (di luar potongan)</div>
+            <div class="info-row">
+              <span class="l">Total AJKO</span>
+              <span class="r" id="kup-out-ajko">Rp 0</span>
+            </div>
+            <div class="info-note">AJKO = Angsuran × 1,02% × Jangka Waktu. Biaya ini bersifat informasi dan tidak mengurangi dana yang diterima.</div>
+          </div>
+
+          <div class="receipt-foot">
+            <div class="foot-item">
+              <span class="foot-label">Total Bayar Selama Tenor</span>
+              <span class="foot-value" id="kup-out-totalbayar">Rp 0</span>
+            </div>
+            <div class="foot-divider"></div>
+            <div class="foot-item">
+              <span class="foot-label">Total Bunga</span>
+              <span class="foot-value" id="kup-out-totalbunga">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="save-btn" id="kup-save-btn" onclick="saveAsPng('kup')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="kup-save-label">Simpan Hasil sebagai PNG</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Simulasi ini untuk perhitungan estimasi. Angka final mengikuti ketentuan resmi lembaga pembiayaan.</footer>
+</div>
+
+<script>
+  function parseNum(str){
+    if(!str) return 0;
+    return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0;
+  }
+  function formatRibuan(numStr){
+    let digits = String(numStr).replace(/\D/g,'');
+    if(digits==='') return '';
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  }
+  function formatRp(n){
+    n = Math.round(n);
+    return 'Rp ' + n.toLocaleString('id-ID');
+  }
+
+  function switchTab(tab){
+    document.getElementById('tabpanel-kur').classList.toggle('active', tab==='kur');
+    document.getElementById('tabpanel-kupedes').classList.toggle('active', tab==='kupedes');
+    document.getElementById('tabbtn-kur').classList.toggle('active', tab==='kur');
+    document.getElementById('tabbtn-kupedes').classList.toggle('active', tab==='kupedes');
+  }
+
+  function setupMoneyInput(id, onChange){
+    const el = document.getElementById(id);
+    el.addEventListener('input', ()=>{
+      const cursorFromEnd = el.value.length - el.selectionStart;
+      el.value = formatRibuan(el.value);
+      const pos = el.value.length - cursorFromEnd;
+      el.setSelectionRange(pos, pos);
+      onChange();
+    });
+  }
+
+  /* ---------- KUR ---------- */
+  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-lainlain'].forEach(id=>setupMoneyInput(id, calcKur));
+  ['kur-tenor','kur-bunga','kur-blokiran'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', calcKur);
+  });
+
+  function calcKur(){
+    const plafond = parseNum(document.getElementById('kur-plafond').value);
+    const tenor = parseInt(document.getElementById('kur-tenor').value) || 0;
+    const bungaTahun = parseFloat(document.getElementById('kur-bunga').value) || 0;
+    const blokiranX = parseInt(document.getElementById('kur-blokiran').value) || 0;
+    const pelunasan = parseNum(document.getElementById('kur-pelunasan').value);
+    const asuransi = parseNum(document.getElementById('kur-asuransi').value);
+    const lainlain = parseNum(document.getElementById('kur-lainlain').value);
+
+    const iBulan = (bungaTahun/100)/12;
+    let angsuran = 0;
+    if(tenor > 0){
+      angsuran = (iBulan === 0) ? (plafond/tenor) : (plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor)));
+    }
+
+    const blokiran = angsuran * blokiranX;
+    const totalPotongan = blokiran + pelunasan + asuransi + lainlain;
+    const diterima = plafond - totalPotongan;
+    const totalBayar = angsuran * tenor;
+    const totalBunga = totalBayar - plafond;
+
+    document.getElementById('kur-out-angsuran').textContent = formatRp(angsuran);
+    document.getElementById('kur-out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
+    document.getElementById('kur-out-plafond').textContent = formatRp(plafond);
+    document.getElementById('kur-out-tenor').textContent = tenor + ' bulan';
+    document.getElementById('kur-out-bunga').textContent = bungaTahun + '% / thn';
+    document.getElementById('kur-out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
+    document.getElementById('kur-out-blokiran').textContent = formatRp(blokiran);
+    document.getElementById('kur-out-pelunasan').textContent = formatRp(pelunasan);
+    document.getElementById('kur-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kur-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kur-out-totalpotongan').textContent = formatRp(totalPotongan);
+    document.getElementById('kur-out-diterima').textContent = formatRp(diterima);
+    document.getElementById('kur-out-totalbayar').textContent = formatRp(totalBayar);
+    document.getElementById('kur-out-totalbunga').textContent = formatRp(totalBunga);
+  }
+
+  /* ---------- KUPEDES ---------- */
+  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-lainlain'].forEach(id=>setupMoneyInput(id, calcKup));
+  ['kup-tenor','kup-bunga','kup-blokiran'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', calcKup);
+  });
+
+  function hitungAdmin(plafond){
+    if(plafond <= 100000000) return 100000;
+    if(plafond <= 250000000) return 250000;
+    return 500000;
+  }
+
+  function calcKup(){
+    const plafond = parseNum(document.getElementById('kup-plafond').value);
+    const tenor = parseInt(document.getElementById('kup-tenor').value) || 0;
+    const bungaTahun = parseFloat(document.getElementById('kup-bunga').value) || 0;
+    const blokiranX = parseInt(document.getElementById('kup-blokiran').value) || 0;
+    const pelunasan = parseNum(document.getElementById('kup-pelunasan').value);
+    const asuransi = parseNum(document.getElementById('kup-asuransi').value);
+    const lainlain = parseNum(document.getElementById('kup-lainlain').value);
+
+    const iBulan = (bungaTahun/100)/12;
+    let angsuran = 0;
+    if(tenor > 0){
+      angsuran = (iBulan === 0) ? (plafond/tenor) : (plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor)));
+    }
+
+    const provisi = plafond * 0.01;
+    const admin = hitungAdmin(plafond);
+
+    document.getElementById('kup-provisi').value = formatRibuan(String(Math.round(provisi)));
+    document.getElementById('kup-admin').value = formatRibuan(String(Math.round(admin)));
+
+    const blokiran = angsuran * blokiranX;
+    const totalPotongan = blokiran + pelunasan + asuransi + lainlain + provisi + admin;
+    const diterima = plafond - totalPotongan;
+    const totalBayar = angsuran * tenor;
+    const totalBunga = totalBayar - plafond;
+
+    const ajko = angsuran * (1.02/100) * tenor;
+
+    document.getElementById('kup-out-angsuran').textContent = formatRp(angsuran);
+    document.getElementById('kup-out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
+    document.getElementById('kup-out-plafond').textContent = formatRp(plafond);
+    document.getElementById('kup-out-tenor').textContent = tenor + ' bulan';
+    document.getElementById('kup-out-bunga').textContent = bungaTahun + '% / thn';
+    document.getElementById('kup-out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
+    document.getElementById('kup-out-blokiran').textContent = formatRp(blokiran);
+    document.getElementById('kup-out-pelunasan').textContent = formatRp(pelunasan);
+    document.getElementById('kup-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kup-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kup-out-provisi').textContent = formatRp(provisi);
+    document.getElementById('kup-out-admin').textContent = formatRp(admin);
+    document.getElementById('kup-out-totalpotongan').textContent = formatRp(totalPotongan);
+    document.getElementById('kup-out-diterima').textContent = formatRp(diterima);
+    document.getElementById('kup-out-totalbayar').textContent = formatRp(totalBayar);
+    document.getElementById('kup-out-totalbunga').textContent = formatRp(totalBunga);
+    document.getElementById('kup-out-ajko').textContent = formatRp(ajko);
+  }
+
+  /* ---------- shared ---------- */
+  const bulanID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const today = new Date();
+  const tglStr = `${today.getDate()} ${bulanID[today.getMonth()]} ${today.getFullYear()}`;
+  document.getElementById('kur-tanggal').textContent = tglStr;
+  document.getElementById('kup-tanggal').textContent = tglStr;
+
+  calcKur();
+  calcKup();
+
+  function saveAsPng(prefix){
+    const btn = document.getElementById(prefix+'-save-btn');
+    const label = document.getElementById(prefix+'-save-label');
+    const target = document.getElementById(prefix+'-receipt-capture');
+    const originalLabel = label.textContent;
+
+    btn.classList.add('saving');
+    label.textContent = 'Menyimpan...';
+
+    const captureWidth = Math.max(target.scrollWidth, 640);
+
+    html2canvas(target, {
+      backgroundColor: '#122C34',
+      scale: 2,
+      useCORS: true,
+      windowWidth: captureWidth + 200,
+      onclone: (clonedDoc, clonedEl) => {
+        clonedEl.style.width = captureWidth + 'px';
+        clonedEl.style.maxWidth = 'none';
+        clonedEl.querySelectorAll('.receipt-foot').forEach(el=>{
+          el.style.flexWrap = 'nowrap';
+        });
+        clonedEl.querySelectorAll('.foot-item, .ledger-row, .receipt-head, .hero-number .sub').forEach(el=>{
+          el.style.whiteSpace = 'nowrap';
+        });
+      }
+    }).then(canvas => {
+      const link = document.createElement('a');
+      const plafondVal = document.getElementById(prefix+'-plafond').value.replace(/\./g,'') || 'pinjaman';
+      const namaProduk = prefix === 'kur' ? 'kur' : 'kupedes';
+      link.download = `simulasi-${namaProduk}-${plafondVal}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.classList.remove('saving');
+      label.textContent = originalLabel;
+    }).catch(err => {
+      console.error('Gagal menyimpan gambar:', err);
+      btn.classList.remove('saving');
+      label.textContent = 'Gagal, coba lagi';
+      setTimeout(()=>{ label.textContent = originalLabel; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
