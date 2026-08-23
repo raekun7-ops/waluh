@@ -6,6 +6,7 @@
 <title>Kalkulator Angsuran & Potongan Pinjaman</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     --ink:#122C34;
@@ -34,7 +35,7 @@
   .wrap{max-width:1080px;margin:0 auto;}
   header{
     text-align:center;
-    margin-bottom:34px;
+    margin-bottom:28px;
     color:var(--paper);
   }
   header .eyebrow{
@@ -59,6 +60,36 @@
     margin:0 auto;
     line-height:1.6;
   }
+
+  /* TABS */
+  .tabbar{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .tab-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:11px 26px;
+    border-radius:999px;
+    border:1.5px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.04);
+    color:#B9C6C4;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .tab-btn:hover{border-color:rgba(200,155,60,0.5);color:var(--paper);}
+  .tab-btn.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--ink);
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
 
   .grid{
     display:grid;
@@ -128,6 +159,9 @@
     border-color:var(--gold);
     box-shadow:0 0 0 3px rgba(200,155,60,0.15);
   }
+  .input-shell.readonly{
+    background:var(--paper-dim);
+  }
   .input-shell .prefix{
     font-family:'IBM Plex Mono',monospace;
     font-size:13px;
@@ -144,6 +178,7 @@
     width:100%;
     color:var(--ink);
   }
+  .input-shell input[readonly]{color:var(--ink-soft);}
   .input-shell .suffix{
     font-size:12.5px;
     color:var(--muted);
@@ -251,6 +286,39 @@
     color:var(--gold-soft);
   }
 
+  .info-box{
+    margin-top:18px;
+    padding:14px 16px;
+    background:rgba(200,155,60,0.1);
+    border:1px dashed rgba(200,155,60,0.4);
+    border-radius:8px;
+  }
+  .info-box .info-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    margin-bottom:6px;
+  }
+  .info-box .info-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13.5px;
+  }
+  .info-box .info-row .l{color:#C7D2CF;}
+  .info-box .info-row .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--gold-soft);
+  }
+  .info-box .info-note{
+    font-size:11px;
+    color:#8FA19F;
+    margin-top:6px;
+    line-height:1.5;
+  }
+
   .receipt-foot{
     margin-top:26px;
     padding-top:16px;
@@ -262,12 +330,29 @@
     letter-spacing:.05em;
   }
 
-  .perforation{
-    position:absolute;
-    left:0; right:0; top:0;
-    height:0;
-    overflow:visible;
+  .save-btn{
+    margin-top:22px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:13px 16px;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    border-radius:9px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.01em;
+    cursor:pointer;
+    transition:background .15s, transform .1s;
   }
+  .save-btn:hover{background:var(--gold-soft);}
+  .save-btn:active{transform:scale(0.98);}
+  .save-btn svg{width:16px;height:16px;flex-shrink:0;}
+  .save-btn.saving{opacity:.7;cursor:progress;}
 
   footer{
     text-align:center;
@@ -286,133 +371,320 @@
     <p>Isi plafond, jangka waktu, dan bunga untuk menghitung angsuran bulanan secara otomatis, lalu lihat rincian potongan pencairan dan jumlah dana yang diterima.</p>
   </header>
 
-  <div class="grid">
-    <!-- FORM -->
-    <div class="panel panel-form">
-      <div class="section-label">Data Pinjaman</div>
+  <div class="tabbar">
+    <button class="tab-btn active" id="tabbtn-kur" onclick="switchTab('kur')">KUR</button>
+    <button class="tab-btn" id="tabbtn-kupedes" onclick="switchTab('kupedes')">Kupedes</button>
+  </div>
 
-      <div class="field">
-        <label for="plafond">Plafond Pinjaman</label>
-        <div class="input-shell">
-          <span class="prefix">Rp</span>
-          <input type="text" id="plafond" inputmode="numeric" value="100.000.000">
-        </div>
-      </div>
+  <!-- ============ TAB KUR ============ -->
+  <div class="tab-panel active" id="tabpanel-kur">
+    <div class="grid">
+      <div class="panel panel-form">
+        <div class="section-label">Data Pinjaman</div>
 
-      <div class="row2">
         <div class="field">
-          <label for="tenor">Jangka Waktu</label>
-          <div class="input-shell">
-            <input type="number" id="tenor" min="1" value="12">
-            <span class="suffix">bulan</span>
-          </div>
-        </div>
-        <div class="field">
-          <label for="bunga">Bunga Anuitas</label>
-          <div class="input-shell">
-            <input type="number" id="bunga" min="0" step="0.01" value="6">
-            <span class="suffix">% / tahun</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="divider-note">
-        Angsuran dihitung otomatis pakai rumus anuitas:<br>
-        <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
-      </div>
-
-      <div class="section-label">Rincian Potongan Pencairan</div>
-
-      <div class="field">
-        <label for="blokiran">Jumlah Blokiran Angsuran</label>
-        <div class="input-shell">
-          <input type="number" id="blokiran" min="0" value="3">
-          <span class="suffix">x angsuran</span>
-        </div>
-        <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
-      </div>
-
-      <div class="field">
-        <label for="pelunasan">Pelunasan Pinjaman Lama</label>
-        <div class="input-shell">
-          <span class="prefix">Rp</span>
-          <input type="text" id="pelunasan" inputmode="numeric" value="0">
-        </div>
-      </div>
-
-      <div class="row2">
-        <div class="field">
-          <label for="asuransi">Asuransi</label>
+          <label for="kur-plafond">Plafond Pinjaman</label>
           <div class="input-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="asuransi" inputmode="numeric" value="800.000">
+            <input type="text" id="kur-plafond" inputmode="numeric" value="100.000.000">
           </div>
         </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kur-tenor">Jangka Waktu</label>
+            <div class="input-shell">
+              <input type="number" id="kur-tenor" min="1" value="12">
+              <span class="suffix">bulan</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="kur-bunga">Bunga Anuitas</label>
+            <div class="input-shell">
+              <input type="number" id="kur-bunga" min="0" step="0.01" value="6">
+              <span class="suffix">% / tahun</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-note">
+          Angsuran dihitung otomatis pakai rumus anuitas:<br>
+          <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
+        </div>
+
+        <div class="section-label">Rincian Potongan Pencairan</div>
+
         <div class="field">
-          <label for="lainlain">Potongan Lain-lain</label>
+          <label for="kur-blokiran">Jumlah Blokiran Angsuran</label>
+          <div class="input-shell">
+            <input type="number" id="kur-blokiran" min="0" value="3">
+            <span class="suffix">x angsuran</span>
+          </div>
+          <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
+        </div>
+
+        <div class="field">
+          <label for="kur-pelunasan">Pelunasan Pinjaman Lama</label>
           <div class="input-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="lainlain" inputmode="numeric" value="400.000">
+            <input type="text" id="kur-pelunasan" inputmode="numeric" value="0">
           </div>
         </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kur-asuransi">Asuransi</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kur-asuransi" inputmode="numeric" value="800.000">
+            </div>
+          </div>
+          <div class="field">
+            <label for="kur-lainlain">Potongan Lain-lain</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kur-lainlain" inputmode="numeric" value="400.000">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-receipt">
+        <div id="kur-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+          <div class="receipt-head">
+            <span>Simulasi Kredit KUR</span>
+            <span id="kur-tanggal"></span>
+          </div>
+
+          <div class="hero-number">
+            <div class="label">Angsuran per Bulan</div>
+            <div class="value" id="kur-out-angsuran">Rp 0</div>
+            <div class="sub" id="kur-out-formula-sub">plafond · tenor · bunga</div>
+          </div>
+
+          <div class="ledger">
+            <div class="ledger-row">
+              <span class="l">Plafond Pinjaman</span>
+              <span class="r" id="kur-out-plafond">Rp 0</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Jangka Waktu</span>
+              <span class="r" id="kur-out-tenor">0 bulan</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Bunga Anuitas</span>
+              <span class="r" id="kur-out-bunga">0% / thn</span>
+            </div>
+
+            <div class="ledger-row deduct">
+              <span class="l">Blokiran Angsuran <span id="kur-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="r" id="kur-out-blokiran">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Pelunasan</span>
+              <span class="r" id="kur-out-pelunasan">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Asuransi</span>
+              <span class="r" id="kur-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Potongan Lain-lain</span>
+              <span class="r" id="kur-out-lainlain">Rp 0</span>
+            </div>
+
+            <div class="ledger-row total">
+              <span class="l">Total Potongan</span>
+              <span class="r" id="kur-out-totalpotongan">Rp 0</span>
+            </div>
+            <div class="ledger-row total final">
+              <span class="l">Dana Diterima Bersih</span>
+              <span class="r" id="kur-out-diterima">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="kur-out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="kur-out-totalbunga">Rp 0</span></div>
+        </div>
+
+        <button class="save-btn" id="kur-save-btn" onclick="saveAsPng('kur')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="kur-save-label">Simpan Hasil sebagai PNG</span>
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- RECEIPT / RESULT -->
-    <div class="panel panel-receipt">
-      <div class="receipt-head">
-        <span>Simulasi Kredit</span>
-        <span id="tanggal"></span>
+  <!-- ============ TAB KUPEDES ============ -->
+  <div class="tab-panel" id="tabpanel-kupedes">
+    <div class="grid">
+      <div class="panel panel-form">
+        <div class="section-label">Data Pinjaman</div>
+
+        <div class="field">
+          <label for="kup-plafond">Plafond Pinjaman</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-plafond" inputmode="numeric" value="100.000.000">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-tenor">Jangka Waktu</label>
+            <div class="input-shell">
+              <input type="number" id="kup-tenor" min="1" value="12">
+              <span class="suffix">bulan</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="kup-bunga">Bunga Anuitas</label>
+            <div class="input-shell">
+              <input type="number" id="kup-bunga" min="0" step="0.01" value="6">
+              <span class="suffix">% / tahun</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-note">
+          Angsuran dihitung otomatis pakai rumus anuitas:<br>
+          <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
+        </div>
+
+        <div class="section-label">Rincian Potongan Pencairan</div>
+
+        <div class="field">
+          <label for="kup-blokiran">Jumlah Blokiran Angsuran</label>
+          <div class="input-shell">
+            <input type="number" id="kup-blokiran" min="0" value="3">
+            <span class="suffix">x angsuran</span>
+          </div>
+          <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
+        </div>
+
+        <div class="field">
+          <label for="kup-pelunasan">Pelunasan Pinjaman Lama</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-pelunasan" inputmode="numeric" value="0">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-asuransi">Asuransi</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-asuransi" inputmode="numeric" value="800.000">
+            </div>
+          </div>
+          <div class="field">
+            <label for="kup-lainlain">Potongan Lain-lain</label>
+            <div class="input-shell">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-lainlain" inputmode="numeric" value="400.000">
+            </div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="kup-provisi">Provisi (otomatis 1%)</label>
+            <div class="input-shell readonly">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-provisi" readonly value="0">
+            </div>
+            <span class="hint">Provisi = 1% × plafond pinjaman.</span>
+          </div>
+          <div class="field">
+            <label for="kup-admin">Biaya Admin (otomatis)</label>
+            <div class="input-shell readonly">
+              <span class="prefix">Rp</span>
+              <input type="text" id="kup-admin" readonly value="0">
+            </div>
+            <span class="hint">≤100jt: 100rb · &gt;100–250jt: 250rb · &gt;250jt: 500rb</span>
+          </div>
+        </div>
       </div>
 
-      <div class="hero-number">
-        <div class="label">Angsuran per Bulan</div>
-        <div class="value" id="out-angsuran">Rp 0</div>
-        <div class="sub" id="out-formula-sub">plafond · tenor · bunga</div>
+      <div class="panel panel-receipt">
+        <div id="kup-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+          <div class="receipt-head">
+            <span>Simulasi Kredit Kupedes</span>
+            <span id="kup-tanggal"></span>
+          </div>
+
+          <div class="hero-number">
+            <div class="label">Angsuran per Bulan</div>
+            <div class="value" id="kup-out-angsuran">Rp 0</div>
+            <div class="sub" id="kup-out-formula-sub">plafond · tenor · bunga</div>
+          </div>
+
+          <div class="ledger">
+            <div class="ledger-row">
+              <span class="l">Plafond Pinjaman</span>
+              <span class="r" id="kup-out-plafond">Rp 0</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Jangka Waktu</span>
+              <span class="r" id="kup-out-tenor">0 bulan</span>
+            </div>
+            <div class="ledger-row">
+              <span class="l">Bunga Anuitas</span>
+              <span class="r" id="kup-out-bunga">0% / thn</span>
+            </div>
+
+            <div class="ledger-row deduct">
+              <span class="l">Blokiran Angsuran <span id="kup-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="r" id="kup-out-blokiran">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Pelunasan</span>
+              <span class="r" id="kup-out-pelunasan">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Asuransi</span>
+              <span class="r" id="kup-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Potongan Lain-lain</span>
+              <span class="r" id="kup-out-lainlain">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Provisi (1%)</span>
+              <span class="r" id="kup-out-provisi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Biaya Admin</span>
+              <span class="r" id="kup-out-admin">Rp 0</span>
+            </div>
+
+            <div class="ledger-row total">
+              <span class="l">Total Potongan</span>
+              <span class="r" id="kup-out-totalpotongan">Rp 0</span>
+            </div>
+            <div class="ledger-row total final">
+              <span class="l">Dana Diterima Bersih</span>
+              <span class="r" id="kup-out-diterima">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Biaya AJKO (di luar potongan)</div>
+            <div class="info-row">
+              <span class="l">Total AJKO</span>
+              <span class="r" id="kup-out-ajko">Rp 0</span>
+            </div>
+            <div class="info-note">AJKO = Angsuran × 1,02% × Jangka Waktu. Biaya ini bersifat informasi dan tidak mengurangi dana yang diterima.</div>
+          </div>
+
+          <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="kup-out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="kup-out-totalbunga">Rp 0</span></div>
+        </div>
+
+        <button class="save-btn" id="kup-save-btn" onclick="saveAsPng('kup')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="kup-save-label">Simpan Hasil sebagai PNG</span>
+        </button>
       </div>
-
-      <div class="ledger">
-        <div class="ledger-row">
-          <span class="l">Plafond Pinjaman</span>
-          <span class="r" id="out-plafond">Rp 0</span>
-        </div>
-        <div class="ledger-row">
-          <span class="l">Jangka Waktu</span>
-          <span class="r" id="out-tenor">0 bulan</span>
-        </div>
-        <div class="ledger-row">
-          <span class="l">Bunga Anuitas</span>
-          <span class="r" id="out-bunga">0% / thn</span>
-        </div>
-
-        <div class="ledger-row deduct">
-          <span class="l">Blokiran Angsuran <span id="out-blokiran-x" style="color:#8FA19F;"></span></span>
-          <span class="r" id="out-blokiran">Rp 0</span>
-        </div>
-        <div class="ledger-row deduct">
-          <span class="l">Pelunasan</span>
-          <span class="r" id="out-pelunasan">Rp 0</span>
-        </div>
-        <div class="ledger-row deduct">
-          <span class="l">Asuransi</span>
-          <span class="r" id="out-asuransi">Rp 0</span>
-        </div>
-        <div class="ledger-row deduct">
-          <span class="l">Potongan Lain-lain</span>
-          <span class="r" id="out-lainlain">Rp 0</span>
-        </div>
-
-        <div class="ledger-row total">
-          <span class="l">Total Potongan</span>
-          <span class="r" id="out-totalpotongan">Rp 0</span>
-        </div>
-        <div class="ledger-row total final">
-          <span class="l">Dana Diterima Bersih</span>
-          <span class="r" id="out-diterima">Rp 0</span>
-        </div>
-      </div>
-
-      <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="out-totalbunga">Rp 0</span></div>
     </div>
   </div>
 
@@ -434,42 +706,43 @@
     return 'Rp ' + n.toLocaleString('id-ID');
   }
 
-  const plafondEl = document.getElementById('plafond');
-  const pelunasanEl = document.getElementById('pelunasan');
-  const asuransiEl = document.getElementById('asuransi');
-  const lainlainEl = document.getElementById('lainlain');
+  function switchTab(tab){
+    document.getElementById('tabpanel-kur').classList.toggle('active', tab==='kur');
+    document.getElementById('tabpanel-kupedes').classList.toggle('active', tab==='kupedes');
+    document.getElementById('tabbtn-kur').classList.toggle('active', tab==='kur');
+    document.getElementById('tabbtn-kupedes').classList.toggle('active', tab==='kupedes');
+  }
 
-  [plafondEl, pelunasanEl, asuransiEl, lainlainEl].forEach(el=>{
+  function setupMoneyInput(id, onChange){
+    const el = document.getElementById(id);
     el.addEventListener('input', ()=>{
       const cursorFromEnd = el.value.length - el.selectionStart;
       el.value = formatRibuan(el.value);
       const pos = el.value.length - cursorFromEnd;
       el.setSelectionRange(pos, pos);
-      calculate();
+      onChange();
     });
+  }
+
+  /* ---------- KUR ---------- */
+  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-lainlain'].forEach(id=>setupMoneyInput(id, calcKur));
+  ['kur-tenor','kur-bunga','kur-blokiran'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', calcKur);
   });
 
-  ['tenor','bunga','blokiran'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', calculate);
-  });
-
-  function calculate(){
-    const plafond = parseNum(plafondEl.value);
-    const tenor = parseInt(document.getElementById('tenor').value) || 0;
-    const bungaTahun = parseFloat(document.getElementById('bunga').value) || 0;
-    const blokiranX = parseInt(document.getElementById('blokiran').value) || 0;
-    const pelunasan = parseNum(pelunasanEl.value);
-    const asuransi = parseNum(asuransiEl.value);
-    const lainlain = parseNum(lainlainEl.value);
+  function calcKur(){
+    const plafond = parseNum(document.getElementById('kur-plafond').value);
+    const tenor = parseInt(document.getElementById('kur-tenor').value) || 0;
+    const bungaTahun = parseFloat(document.getElementById('kur-bunga').value) || 0;
+    const blokiranX = parseInt(document.getElementById('kur-blokiran').value) || 0;
+    const pelunasan = parseNum(document.getElementById('kur-pelunasan').value);
+    const asuransi = parseNum(document.getElementById('kur-asuransi').value);
+    const lainlain = parseNum(document.getElementById('kur-lainlain').value);
 
     const iBulan = (bungaTahun/100)/12;
     let angsuran = 0;
     if(tenor > 0){
-      if(iBulan === 0){
-        angsuran = plafond / tenor;
-      } else {
-        angsuran = plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor));
-      }
+      angsuran = (iBulan === 0) ? (plafond/tenor) : (plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor)));
     }
 
     const blokiran = angsuran * blokiranX;
@@ -478,31 +751,121 @@
     const totalBayar = angsuran * tenor;
     const totalBunga = totalBayar - plafond;
 
-    document.getElementById('out-angsuran').textContent = formatRp(angsuran);
-    document.getElementById('out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
-
-    document.getElementById('out-plafond').textContent = formatRp(plafond);
-    document.getElementById('out-tenor').textContent = tenor + ' bulan';
-    document.getElementById('out-bunga').textContent = bungaTahun + '% / thn';
-
-    document.getElementById('out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
-    document.getElementById('out-blokiran').textContent = formatRp(blokiran);
-    document.getElementById('out-pelunasan').textContent = formatRp(pelunasan);
-    document.getElementById('out-asuransi').textContent = formatRp(asuransi);
-    document.getElementById('out-lainlain').textContent = formatRp(lainlain);
-
-    document.getElementById('out-totalpotongan').textContent = formatRp(totalPotongan);
-    document.getElementById('out-diterima').textContent = formatRp(diterima);
-
-    document.getElementById('out-totalbayar').textContent = formatRp(totalBayar);
-    document.getElementById('out-totalbunga').textContent = formatRp(totalBunga);
+    document.getElementById('kur-out-angsuran').textContent = formatRp(angsuran);
+    document.getElementById('kur-out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
+    document.getElementById('kur-out-plafond').textContent = formatRp(plafond);
+    document.getElementById('kur-out-tenor').textContent = tenor + ' bulan';
+    document.getElementById('kur-out-bunga').textContent = bungaTahun + '% / thn';
+    document.getElementById('kur-out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
+    document.getElementById('kur-out-blokiran').textContent = formatRp(blokiran);
+    document.getElementById('kur-out-pelunasan').textContent = formatRp(pelunasan);
+    document.getElementById('kur-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kur-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kur-out-totalpotongan').textContent = formatRp(totalPotongan);
+    document.getElementById('kur-out-diterima').textContent = formatRp(diterima);
+    document.getElementById('kur-out-totalbayar').textContent = formatRp(totalBayar);
+    document.getElementById('kur-out-totalbunga').textContent = formatRp(totalBunga);
   }
 
+  /* ---------- KUPEDES ---------- */
+  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-lainlain'].forEach(id=>setupMoneyInput(id, calcKup));
+  ['kup-tenor','kup-bunga','kup-blokiran'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', calcKup);
+  });
+
+  function hitungAdmin(plafond){
+    if(plafond <= 100000000) return 100000;
+    if(plafond <= 250000000) return 250000;
+    return 500000;
+  }
+
+  function calcKup(){
+    const plafond = parseNum(document.getElementById('kup-plafond').value);
+    const tenor = parseInt(document.getElementById('kup-tenor').value) || 0;
+    const bungaTahun = parseFloat(document.getElementById('kup-bunga').value) || 0;
+    const blokiranX = parseInt(document.getElementById('kup-blokiran').value) || 0;
+    const pelunasan = parseNum(document.getElementById('kup-pelunasan').value);
+    const asuransi = parseNum(document.getElementById('kup-asuransi').value);
+    const lainlain = parseNum(document.getElementById('kup-lainlain').value);
+
+    const iBulan = (bungaTahun/100)/12;
+    let angsuran = 0;
+    if(tenor > 0){
+      angsuran = (iBulan === 0) ? (plafond/tenor) : (plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor)));
+    }
+
+    const provisi = plafond * 0.01;
+    const admin = hitungAdmin(plafond);
+
+    document.getElementById('kup-provisi').value = formatRibuan(String(Math.round(provisi)));
+    document.getElementById('kup-admin').value = formatRibuan(String(Math.round(admin)));
+
+    const blokiran = angsuran * blokiranX;
+    const totalPotongan = blokiran + pelunasan + asuransi + lainlain + provisi + admin;
+    const diterima = plafond - totalPotongan;
+    const totalBayar = angsuran * tenor;
+    const totalBunga = totalBayar - plafond;
+
+    const ajko = angsuran * (1.02/100) * tenor;
+
+    document.getElementById('kup-out-angsuran').textContent = formatRp(angsuran);
+    document.getElementById('kup-out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
+    document.getElementById('kup-out-plafond').textContent = formatRp(plafond);
+    document.getElementById('kup-out-tenor').textContent = tenor + ' bulan';
+    document.getElementById('kup-out-bunga').textContent = bungaTahun + '% / thn';
+    document.getElementById('kup-out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
+    document.getElementById('kup-out-blokiran').textContent = formatRp(blokiran);
+    document.getElementById('kup-out-pelunasan').textContent = formatRp(pelunasan);
+    document.getElementById('kup-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kup-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kup-out-provisi').textContent = formatRp(provisi);
+    document.getElementById('kup-out-admin').textContent = formatRp(admin);
+    document.getElementById('kup-out-totalpotongan').textContent = formatRp(totalPotongan);
+    document.getElementById('kup-out-diterima').textContent = formatRp(diterima);
+    document.getElementById('kup-out-totalbayar').textContent = formatRp(totalBayar);
+    document.getElementById('kup-out-totalbunga').textContent = formatRp(totalBunga);
+    document.getElementById('kup-out-ajko').textContent = formatRp(ajko);
+  }
+
+  /* ---------- shared ---------- */
   const bulanID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
   const today = new Date();
-  document.getElementById('tanggal').textContent = `${today.getDate()} ${bulanID[today.getMonth()]} ${today.getFullYear()}`;
+  const tglStr = `${today.getDate()} ${bulanID[today.getMonth()]} ${today.getFullYear()}`;
+  document.getElementById('kur-tanggal').textContent = tglStr;
+  document.getElementById('kup-tanggal').textContent = tglStr;
 
-  calculate();
+  calcKur();
+  calcKup();
+
+  function saveAsPng(prefix){
+    const btn = document.getElementById(prefix+'-save-btn');
+    const label = document.getElementById(prefix+'-save-label');
+    const target = document.getElementById(prefix+'-receipt-capture');
+    const originalLabel = label.textContent;
+
+    btn.classList.add('saving');
+    label.textContent = 'Menyimpan...';
+
+    html2canvas(target, {
+      backgroundColor: '#122C34',
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
+      const link = document.createElement('a');
+      const plafondVal = document.getElementById(prefix+'-plafond').value.replace(/\./g,'') || 'pinjaman';
+      const namaProduk = prefix === 'kur' ? 'kur' : 'kupedes';
+      link.download = `simulasi-${namaProduk}-${plafondVal}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.classList.remove('saving');
+      label.textContent = originalLabel;
+    }).catch(err => {
+      console.error('Gagal menyimpan gambar:', err);
+      btn.classList.remove('saving');
+      label.textContent = 'Gagal, coba lagi';
+      setTimeout(()=>{ label.textContent = originalLabel; }, 2000);
+    });
+  }
 </script>
 </body>
 </html>
