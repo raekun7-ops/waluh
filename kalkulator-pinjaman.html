@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Angsuran & Potongan Pinjaman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#122C34;
+    --ink-soft:#2C4A54;
+    --paper:#FAF7F0;
+    --paper-dim:#F1ECE0;
+    --gold:#C89B3C;
+    --gold-soft:#E9D9A8;
+    --line:#D8D0BC;
+    --green:#2F6F4E;
+    --red:#A6432F;
+    --muted:#7C8A88;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(200,155,60,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(200,155,60,0.06), transparent 45%);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:40px 20px 60px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+  header{
+    text-align:center;
+    margin-bottom:34px;
+    color:var(--paper);
+  }
+  header .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold-soft);
+    margin-bottom:10px;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:#B9C6C4;
+    font-size:14.5px;
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1.05fr;
+    gap:0;
+    background:var(--paper);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  }
+  @media (max-width:800px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{padding:38px 36px;}
+  .panel-form{
+    background:var(--paper);
+    border-right:1px dashed var(--line);
+  }
+  @media (max-width:800px){
+    .panel-form{border-right:none;border-bottom:1px dashed var(--line);}
+  }
+
+  .section-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:7px;
+  }
+  .field .hint{
+    font-size:11.5px;
+    color:var(--muted);
+    font-weight:400;
+    display:block;
+    margin-top:4px;
+  }
+  .input-shell{
+    display:flex;
+    align-items:center;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    padding:0 4px 0 14px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .input-shell:focus-within{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(200,155,60,0.15);
+  }
+  .input-shell .prefix{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+    margin-right:6px;
+  }
+  .input-shell input{
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15.5px;
+    padding:11px 8px;
+    width:100%;
+    color:var(--ink);
+  }
+  .input-shell .suffix{
+    font-size:12.5px;
+    color:var(--muted);
+    padding-right:10px;
+    white-space:nowrap;
+  }
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:480px){.row2{grid-template-columns:1fr;}}
+
+  .divider-note{
+    margin:26px 0 22px;
+    padding:12px 14px;
+    background:var(--paper-dim);
+    border-left:3px solid var(--gold);
+    border-radius:6px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+  }
+
+  /* RECEIPT PANEL */
+  .panel-receipt{
+    background:var(--ink);
+    color:var(--paper);
+    position:relative;
+  }
+  .receipt-head{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:22px;
+    padding-bottom:14px;
+    border-bottom:1px dashed rgba(255,255,255,0.2);
+  }
+
+  .hero-number{
+    text-align:center;
+    padding:6px 0 26px;
+  }
+  .hero-number .label{
+    font-size:12px;
+    color:#9FB0AE;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .hero-number .value{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(30px,4.2vw,44px);
+    color:var(--gold-soft);
+    letter-spacing:-0.01em;
+  }
+  .hero-number .sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:#8FA19F;
+    margin-top:6px;
+  }
+
+  .ledger{
+    border-top:1px dashed rgba(255,255,255,0.2);
+    padding-top:6px;
+  }
+  .ledger-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:9px 0;
+    font-size:13.5px;
+    border-bottom:1px dotted rgba(255,255,255,0.12);
+  }
+  .ledger-row .l{color:#C7D2CF;}
+  .ledger-row .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;
+    color:var(--paper);
+  }
+  .ledger-row.deduct .r{color:#E8A98F;}
+  .ledger-row.deduct .r::before{content:"– ";}
+  .ledger-row.total{
+    margin-top:8px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.25);
+    border-bottom:none;
+  }
+  .ledger-row.total .l{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--paper);
+  }
+  .ledger-row.total .r{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:17px;
+    font-weight:600;
+    color:#8FE0B4;
+  }
+  .ledger-row.final .r{
+    font-size:20px;
+    color:var(--gold-soft);
+  }
+
+  .receipt-foot{
+    margin-top:26px;
+    padding-top:16px;
+    border-top:1px dashed rgba(255,255,255,0.2);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:#7E9290;
+    text-align:center;
+    letter-spacing:.05em;
+  }
+
+  .perforation{
+    position:absolute;
+    left:0; right:0; top:0;
+    height:0;
+    overflow:visible;
+  }
+
+  footer{
+    text-align:center;
+    color:#7E9290;
+    font-size:12px;
+    margin-top:22px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Simulasi Kredit · Bunga Anuitas</div>
+    <h1>Kalkulator Angsuran &amp; Potongan Pinjaman</h1>
+    <p>Isi plafond, jangka waktu, dan bunga untuk menghitung angsuran bulanan secara otomatis, lalu lihat rincian potongan pencairan dan jumlah dana yang diterima.</p>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div class="panel panel-form">
+      <div class="section-label">Data Pinjaman</div>
+
+      <div class="field">
+        <label for="plafond">Plafond Pinjaman</label>
+        <div class="input-shell">
+          <span class="prefix">Rp</span>
+          <input type="text" id="plafond" inputmode="numeric" value="100.000.000">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="tenor">Jangka Waktu</label>
+          <div class="input-shell">
+            <input type="number" id="tenor" min="1" value="12">
+            <span class="suffix">bulan</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="bunga">Bunga Anuitas</label>
+          <div class="input-shell">
+            <input type="number" id="bunga" min="0" step="0.01" value="6">
+            <span class="suffix">% / tahun</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider-note">
+        Angsuran dihitung otomatis pakai rumus anuitas:<br>
+        <strong>Angsuran = P × i / (1 − (1+i)⁻ⁿ)</strong> — P = plafond, i = bunga per bulan, n = jangka waktu.
+      </div>
+
+      <div class="section-label">Rincian Potongan Pencairan</div>
+
+      <div class="field">
+        <label for="blokiran">Jumlah Blokiran Angsuran</label>
+        <div class="input-shell">
+          <input type="number" id="blokiran" min="0" value="3">
+          <span class="suffix">x angsuran</span>
+        </div>
+        <span class="hint">Isi 3 → blokiran = 3 × angsuran bulanan (dihitung otomatis).</span>
+      </div>
+
+      <div class="field">
+        <label for="pelunasan">Pelunasan Pinjaman Lama</label>
+        <div class="input-shell">
+          <span class="prefix">Rp</span>
+          <input type="text" id="pelunasan" inputmode="numeric" value="0">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="asuransi">Asuransi</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="asuransi" inputmode="numeric" value="800.000">
+          </div>
+        </div>
+        <div class="field">
+          <label for="lainlain">Potongan Lain-lain</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="lainlain" inputmode="numeric" value="400.000">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECEIPT / RESULT -->
+    <div class="panel panel-receipt">
+      <div class="receipt-head">
+        <span>Simulasi Kredit</span>
+        <span id="tanggal"></span>
+      </div>
+
+      <div class="hero-number">
+        <div class="label">Angsuran per Bulan</div>
+        <div class="value" id="out-angsuran">Rp 0</div>
+        <div class="sub" id="out-formula-sub">plafond · tenor · bunga</div>
+      </div>
+
+      <div class="ledger">
+        <div class="ledger-row">
+          <span class="l">Plafond Pinjaman</span>
+          <span class="r" id="out-plafond">Rp 0</span>
+        </div>
+        <div class="ledger-row">
+          <span class="l">Jangka Waktu</span>
+          <span class="r" id="out-tenor">0 bulan</span>
+        </div>
+        <div class="ledger-row">
+          <span class="l">Bunga Anuitas</span>
+          <span class="r" id="out-bunga">0% / thn</span>
+        </div>
+
+        <div class="ledger-row deduct">
+          <span class="l">Blokiran Angsuran <span id="out-blokiran-x" style="color:#8FA19F;"></span></span>
+          <span class="r" id="out-blokiran">Rp 0</span>
+        </div>
+        <div class="ledger-row deduct">
+          <span class="l">Pelunasan</span>
+          <span class="r" id="out-pelunasan">Rp 0</span>
+        </div>
+        <div class="ledger-row deduct">
+          <span class="l">Asuransi</span>
+          <span class="r" id="out-asuransi">Rp 0</span>
+        </div>
+        <div class="ledger-row deduct">
+          <span class="l">Potongan Lain-lain</span>
+          <span class="r" id="out-lainlain">Rp 0</span>
+        </div>
+
+        <div class="ledger-row total">
+          <span class="l">Total Potongan</span>
+          <span class="r" id="out-totalpotongan">Rp 0</span>
+        </div>
+        <div class="ledger-row total final">
+          <span class="l">Dana Diterima Bersih</span>
+          <span class="r" id="out-diterima">Rp 0</span>
+        </div>
+      </div>
+
+      <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="out-totalbunga">Rp 0</span></div>
+    </div>
+  </div>
+
+  <footer>Simulasi ini untuk perhitungan estimasi. Angka final mengikuti ketentuan resmi lembaga pembiayaan.</footer>
+</div>
+
+<script>
+  function parseNum(str){
+    if(!str) return 0;
+    return parseFloat(String(str).replace(/\./g,'').replace(/,/g,'.')) || 0;
+  }
+  function formatRibuan(numStr){
+    let digits = String(numStr).replace(/\D/g,'');
+    if(digits==='') return '';
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  }
+  function formatRp(n){
+    n = Math.round(n);
+    return 'Rp ' + n.toLocaleString('id-ID');
+  }
+
+  const plafondEl = document.getElementById('plafond');
+  const pelunasanEl = document.getElementById('pelunasan');
+  const asuransiEl = document.getElementById('asuransi');
+  const lainlainEl = document.getElementById('lainlain');
+
+  [plafondEl, pelunasanEl, asuransiEl, lainlainEl].forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const cursorFromEnd = el.value.length - el.selectionStart;
+      el.value = formatRibuan(el.value);
+      const pos = el.value.length - cursorFromEnd;
+      el.setSelectionRange(pos, pos);
+      calculate();
+    });
+  });
+
+  ['tenor','bunga','blokiran'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', calculate);
+  });
+
+  function calculate(){
+    const plafond = parseNum(plafondEl.value);
+    const tenor = parseInt(document.getElementById('tenor').value) || 0;
+    const bungaTahun = parseFloat(document.getElementById('bunga').value) || 0;
+    const blokiranX = parseInt(document.getElementById('blokiran').value) || 0;
+    const pelunasan = parseNum(pelunasanEl.value);
+    const asuransi = parseNum(asuransiEl.value);
+    const lainlain = parseNum(lainlainEl.value);
+
+    const iBulan = (bungaTahun/100)/12;
+    let angsuran = 0;
+    if(tenor > 0){
+      if(iBulan === 0){
+        angsuran = plafond / tenor;
+      } else {
+        angsuran = plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor));
+      }
+    }
+
+    const blokiran = angsuran * blokiranX;
+    const totalPotongan = blokiran + pelunasan + asuransi + lainlain;
+    const diterima = plafond - totalPotongan;
+    const totalBayar = angsuran * tenor;
+    const totalBunga = totalBayar - plafond;
+
+    document.getElementById('out-angsuran').textContent = formatRp(angsuran);
+    document.getElementById('out-formula-sub').textContent = `${formatRp(plafond)} · ${tenor} bln · ${bungaTahun}%/thn`;
+
+    document.getElementById('out-plafond').textContent = formatRp(plafond);
+    document.getElementById('out-tenor').textContent = tenor + ' bulan';
+    document.getElementById('out-bunga').textContent = bungaTahun + '% / thn';
+
+    document.getElementById('out-blokiran-x').textContent = blokiranX > 0 ? `(${blokiranX}×)` : '';
+    document.getElementById('out-blokiran').textContent = formatRp(blokiran);
+    document.getElementById('out-pelunasan').textContent = formatRp(pelunasan);
+    document.getElementById('out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('out-lainlain').textContent = formatRp(lainlain);
+
+    document.getElementById('out-totalpotongan').textContent = formatRp(totalPotongan);
+    document.getElementById('out-diterima').textContent = formatRp(diterima);
+
+    document.getElementById('out-totalbayar').textContent = formatRp(totalBayar);
+    document.getElementById('out-totalbunga').textContent = formatRp(totalBunga);
+  }
+
+  const bulanID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const today = new Date();
+  document.getElementById('tanggal').textContent = `${today.getDate()} ${bulanID[today.getMonth()]} ${today.getFullYear()}`;
+
+  calculate();
+</script>
+</body>
+</html>
