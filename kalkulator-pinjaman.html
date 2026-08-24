@@ -252,15 +252,17 @@
     display:flex;
     justify-content:space-between;
     align-items:baseline;
-    padding:9px 0;
-    font-size:13.5px;
+    padding:10px 0;
+    font-size:15.5px;
     border-bottom:1px dotted rgba(255,255,255,0.12);
+    gap:24px;
   }
   .ledger-row .l{color:#C7D2CF;}
   .ledger-row .r{
     font-family:'IBM Plex Mono',monospace;
-    font-weight:500;
+    font-weight:600;
     color:var(--paper);
+    white-space:nowrap;
   }
   .ledger-row.deduct .r{color:#E8A98F;}
   .ledger-row.deduct .r::before{content:"– ";}
@@ -323,11 +325,36 @@
     margin-top:26px;
     padding-top:16px;
     border-top:1px dashed rgba(255,255,255,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  .foot-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    white-space:nowrap;
+  }
+  .foot-item .foot-label{
     font-family:'IBM Plex Mono',monospace;
-    font-size:10.5px;
+    font-size:9.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
     color:#7E9290;
-    text-align:center;
-    letter-spacing:.05em;
+  }
+  .foot-item .foot-value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--gold-soft);
+  }
+  .foot-divider{
+    width:1px;
+    height:26px;
+    background:rgba(255,255,255,0.15);
   }
 
   .save-btn{
@@ -503,7 +530,17 @@
             </div>
           </div>
 
-          <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="kur-out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="kur-out-totalbunga">Rp 0</span></div>
+          <div class="receipt-foot">
+            <div class="foot-item">
+              <span class="foot-label">Total Bayar Selama Tenor</span>
+              <span class="foot-value" id="kur-out-totalbayar">Rp 0</span>
+            </div>
+            <div class="foot-divider"></div>
+            <div class="foot-item">
+              <span class="foot-label">Total Bunga</span>
+              <span class="foot-value" id="kur-out-totalbunga">Rp 0</span>
+            </div>
+          </div>
         </div>
 
         <button class="save-btn" id="kur-save-btn" onclick="saveAsPng('kur')">
@@ -677,7 +714,17 @@
             <div class="info-note">AJKO = Angsuran × 1,02% × Jangka Waktu. Biaya ini bersifat informasi dan tidak mengurangi dana yang diterima.</div>
           </div>
 
-          <div class="receipt-foot">TOTAL BAYAR SELAMA TENOR: <span id="kup-out-totalbayar">Rp 0</span> · TOTAL BUNGA: <span id="kup-out-totalbunga">Rp 0</span></div>
+          <div class="receipt-foot">
+            <div class="foot-item">
+              <span class="foot-label">Total Bayar Selama Tenor</span>
+              <span class="foot-value" id="kup-out-totalbayar">Rp 0</span>
+            </div>
+            <div class="foot-divider"></div>
+            <div class="foot-item">
+              <span class="foot-label">Total Bunga</span>
+              <span class="foot-value" id="kup-out-totalbunga">Rp 0</span>
+            </div>
+          </div>
         </div>
 
         <button class="save-btn" id="kup-save-btn" onclick="saveAsPng('kup')">
@@ -846,10 +893,31 @@
     btn.classList.add('saving');
     label.textContent = 'Menyimpan...';
 
+    const naturalWidth = target.offsetWidth;
+
     html2canvas(target, {
       backgroundColor: '#122C34',
       scale: 2,
-      useCORS: true
+      useCORS: true,
+      windowWidth: naturalWidth + 200,
+      onclone: (clonedDoc, clonedEl) => {
+        clonedEl.style.width = naturalWidth + 'px';
+        clonedEl.style.maxWidth = 'none';
+        clonedEl.querySelectorAll('.receipt-foot').forEach(el=>{
+          el.style.flexWrap = 'nowrap';
+        });
+        clonedEl.querySelectorAll('.foot-item, .ledger-row .r, .receipt-head, .hero-number .sub').forEach(el=>{
+          el.style.whiteSpace = 'nowrap';
+        });
+        // If footer or any row still doesn't fit at natural width, grow just enough to fit it
+        let needed = naturalWidth;
+        clonedEl.querySelectorAll('.receipt-foot, .ledger-row, .hero-number .sub').forEach(el=>{
+          needed = Math.max(needed, el.scrollWidth);
+        });
+        if(needed > naturalWidth){
+          clonedEl.style.width = needed + 'px';
+        }
+      }
     }).then(canvas => {
       const link = document.createElement('a');
       const plafondVal = document.getElementById(prefix+'-plafond').value.replace(/\./g,'') || 'pinjaman';
