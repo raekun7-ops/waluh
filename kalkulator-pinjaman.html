@@ -467,11 +467,19 @@
             </div>
           </div>
           <div class="field">
-            <label for="kur-lainlain">Potongan Lain-lain</label>
+            <label for="kur-notaris">Biaya Notaris</label>
             <div class="input-shell">
               <span class="prefix">Rp</span>
-              <input type="text" id="kur-lainlain" inputmode="numeric" value="400.000">
+              <input type="text" id="kur-notaris" inputmode="numeric" value="0">
             </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="kur-lainlain">Potongan Lain-lain</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kur-lainlain" inputmode="numeric" value="400.000">
           </div>
         </div>
       </div>
@@ -514,6 +522,10 @@
             <div class="ledger-row deduct">
               <span class="l">Asuransi</span>
               <span class="r" id="kur-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Biaya Notaris</span>
+              <span class="r" id="kur-out-notaris">Rp 0</span>
             </div>
             <div class="ledger-row deduct">
               <span class="l">Potongan Lain-lain</span>
@@ -615,11 +627,19 @@
             </div>
           </div>
           <div class="field">
-            <label for="kup-lainlain">Potongan Lain-lain</label>
+            <label for="kup-notaris">Biaya Notaris</label>
             <div class="input-shell">
               <span class="prefix">Rp</span>
-              <input type="text" id="kup-lainlain" inputmode="numeric" value="400.000">
+              <input type="text" id="kup-notaris" inputmode="numeric" value="0">
             </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="kup-lainlain">Potongan Lain-lain</label>
+          <div class="input-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-lainlain" inputmode="numeric" value="400.000">
           </div>
         </div>
 
@@ -681,6 +701,10 @@
             <div class="ledger-row deduct">
               <span class="l">Asuransi</span>
               <span class="r" id="kup-out-asuransi">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct">
+              <span class="l">Biaya Notaris</span>
+              <span class="r" id="kup-out-notaris">Rp 0</span>
             </div>
             <div class="ledger-row deduct">
               <span class="l">Potongan Lain-lain</span>
@@ -772,7 +796,7 @@
   }
 
   /* ---------- KUR ---------- */
-  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-lainlain'].forEach(id=>setupMoneyInput(id, calcKur));
+  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-notaris','kur-lainlain'].forEach(id=>setupMoneyInput(id, calcKur));
   ['kur-tenor','kur-bunga','kur-blokiran'].forEach(id=>{
     document.getElementById(id).addEventListener('input', calcKur);
   });
@@ -784,6 +808,7 @@
     const blokiranX = parseInt(document.getElementById('kur-blokiran').value) || 0;
     const pelunasan = parseNum(document.getElementById('kur-pelunasan').value);
     const asuransi = parseNum(document.getElementById('kur-asuransi').value);
+    const notaris = parseNum(document.getElementById('kur-notaris').value);
     const lainlain = parseNum(document.getElementById('kur-lainlain').value);
 
     const iBulan = (bungaTahun/100)/12;
@@ -793,7 +818,7 @@
     }
 
     const blokiran = angsuran * blokiranX;
-    const totalPotongan = blokiran + pelunasan + asuransi + lainlain;
+    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain;
     const diterima = plafond - totalPotongan;
     const totalBayar = angsuran * tenor;
     const totalBunga = totalBayar - plafond;
@@ -807,6 +832,7 @@
     document.getElementById('kur-out-blokiran').textContent = formatRp(blokiran);
     document.getElementById('kur-out-pelunasan').textContent = formatRp(pelunasan);
     document.getElementById('kur-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kur-out-notaris').textContent = formatRp(notaris);
     document.getElementById('kur-out-lainlain').textContent = formatRp(lainlain);
     document.getElementById('kur-out-totalpotongan').textContent = formatRp(totalPotongan);
     document.getElementById('kur-out-diterima').textContent = formatRp(diterima);
@@ -815,7 +841,7 @@
   }
 
   /* ---------- KUPEDES ---------- */
-  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-lainlain'].forEach(id=>setupMoneyInput(id, calcKup));
+  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-notaris','kup-lainlain'].forEach(id=>setupMoneyInput(id, calcKup));
   ['kup-tenor','kup-bunga','kup-blokiran'].forEach(id=>{
     document.getElementById(id).addEventListener('input', calcKup);
   });
@@ -833,6 +859,7 @@
     const blokiranX = parseInt(document.getElementById('kup-blokiran').value) || 0;
     const pelunasan = parseNum(document.getElementById('kup-pelunasan').value);
     const asuransi = parseNum(document.getElementById('kup-asuransi').value);
+    const notaris = parseNum(document.getElementById('kup-notaris').value);
     const lainlain = parseNum(document.getElementById('kup-lainlain').value);
 
     const iBulan = (bungaTahun/100)/12;
@@ -848,7 +875,7 @@
     document.getElementById('kup-admin').value = formatRibuan(String(Math.round(admin)));
 
     const blokiran = angsuran * blokiranX;
-    const totalPotongan = blokiran + pelunasan + asuransi + lainlain + provisi + admin;
+    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain + provisi + admin;
     const diterima = plafond - totalPotongan;
     const totalBayar = angsuran * tenor;
     const totalBunga = totalBayar - plafond;
@@ -864,6 +891,7 @@
     document.getElementById('kup-out-blokiran').textContent = formatRp(blokiran);
     document.getElementById('kup-out-pelunasan').textContent = formatRp(pelunasan);
     document.getElementById('kup-out-asuransi').textContent = formatRp(asuransi);
+    document.getElementById('kup-out-notaris').textContent = formatRp(notaris);
     document.getElementById('kup-out-lainlain').textContent = formatRp(lainlain);
     document.getElementById('kup-out-provisi').textContent = formatRp(provisi);
     document.getElementById('kup-out-admin').textContent = formatRp(admin);
