@@ -9,24 +9,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --ink:#122C34;
-    --ink-soft:#2C4A54;
-    --paper:#FAF7F0;
-    --paper-dim:#F1ECE0;
-    --gold:#C89B3C;
-    --gold-soft:#E9D9A8;
-    --line:#D8D0BC;
-    --green:#2F6F4E;
-    --red:#A6432F;
-    --muted:#7C8A88;
+    --ink:#062D63;
+    --ink-soft:#3D5D8F;
+    --paper:#FFFFFF;
+    --paper-dim:#E9F0FC;
+    --gold:#0957C3;
+    --gold-soft:#073F91;
+    --line:#D3E2F7;
+    --green:#1E8A5C;
+    --red:#C0392B;
+    --muted:#7690B5;
+    --receipt-bg:#0A5FD1;
+    --receipt-bg2:#063A82;
+    --on-blue:#FFFFFF;
+    --on-blue-soft:rgba(255,255,255,0.78);
+    --on-blue-muted:rgba(255,255,255,0.58);
+    --on-blue-line:rgba(255,255,255,0.22);
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--ink);
+    background:#F5FAFE;
     background-image:
-      radial-gradient(circle at 15% 20%, rgba(200,155,60,0.08), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(200,155,60,0.06), transparent 45%);
+      radial-gradient(circle at 15% 20%, rgba(9,87,195,0.10), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(9,87,195,0.08), transparent 45%);
     font-family:'Inter',sans-serif;
     color:var(--ink);
     min-height:100vh;
@@ -36,7 +42,7 @@
   header{
     text-align:center;
     margin-bottom:28px;
-    color:var(--paper);
+    color:var(--ink);
   }
   header .eyebrow{
     font-family:'IBM Plex Mono',monospace;
@@ -54,7 +60,7 @@
     letter-spacing:-0.01em;
   }
   header p{
-    color:#B9C6C4;
+    color:var(--ink-soft);
     font-size:14.5px;
     max-width:520px;
     margin:0 auto;
@@ -76,17 +82,17 @@
     font-weight:600;
     padding:11px 26px;
     border-radius:999px;
-    border:1.5px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.04);
-    color:#B9C6C4;
+    border:1.5px solid var(--line);
+    background:#FFFFFF;
+    color:var(--ink-soft);
     cursor:pointer;
     transition:all .15s;
   }
-  .tab-btn:hover{border-color:rgba(200,155,60,0.5);color:var(--paper);}
+  .tab-btn:hover{border-color:var(--gold);color:var(--ink);}
   .tab-btn.active{
     background:var(--gold);
     border-color:var(--gold);
-    color:var(--ink);
+    color:#FFFFFF;
   }
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
@@ -98,7 +104,7 @@
     background:var(--paper);
     border-radius:18px;
     overflow:hidden;
-    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+    box-shadow:0 20px 50px -18px rgba(6,45,99,.18);
   }
   @media (max-width:800px){
     .grid{grid-template-columns:1fr;}
@@ -139,6 +145,51 @@
     color:var(--ink-soft);
     margin-bottom:7px;
   }
+  .field-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:7px;
+  }
+  .field-head label{margin-bottom:0;}
+  .chk-toggle{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .chk-toggle input[type="checkbox"]{
+    width:14px;
+    height:14px;
+    accent-color:var(--gold);
+    cursor:pointer;
+    margin:0;
+  }
+  .input-shell.disabled{
+    background:var(--paper-dim);
+    opacity:.55;
+  }
+  .input-shell.disabled input{
+    color:var(--muted);
+  }
+  .foot-toggle-group{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    padding:12px 14px;
+    background:var(--paper-dim);
+    border-radius:9px;
+  }
+  .foot-toggle-group .chk-toggle{
+    font-size:13px;
+    color:var(--ink-soft);
+  }
   .field .hint{
     font-size:11.5px;
     color:var(--muted);
@@ -157,7 +208,7 @@
   }
   .input-shell:focus-within{
     border-color:var(--gold);
-    box-shadow:0 0 0 3px rgba(200,155,60,0.15);
+    box-shadow:0 0 0 3px rgba(9,87,195,0.18);
   }
   .input-shell.readonly{
     background:var(--paper-dim);
@@ -202,8 +253,8 @@
 
   /* RECEIPT PANEL */
   .panel-receipt{
-    background:var(--ink);
-    color:var(--paper);
+    background:linear-gradient(160deg, var(--receipt-bg), var(--receipt-bg2));
+    color:var(--on-blue);
     position:relative;
   }
   .receipt-head{
@@ -211,12 +262,12 @@
     font-size:11px;
     letter-spacing:.15em;
     text-transform:uppercase;
-    color:var(--gold-soft);
+    color:var(--on-blue);
     display:flex;
     justify-content:space-between;
     margin-bottom:22px;
     padding-bottom:14px;
-    border-bottom:1px dashed rgba(255,255,255,0.2);
+    border-bottom:1px dashed var(--on-blue-line);
   }
 
   .hero-number{
@@ -225,7 +276,7 @@
   }
   .hero-number .label{
     font-size:12px;
-    color:#9FB0AE;
+    color:var(--on-blue);
     letter-spacing:.08em;
     text-transform:uppercase;
     margin-bottom:8px;
@@ -234,18 +285,18 @@
     font-family:'Fraunces',serif;
     font-weight:600;
     font-size:clamp(30px,4.2vw,44px);
-    color:var(--gold-soft);
+    color:var(--on-blue);
     letter-spacing:-0.01em;
   }
   .hero-number .sub{
     font-family:'IBM Plex Mono',monospace;
     font-size:12px;
-    color:#8FA19F;
+    color:var(--on-blue);
     margin-top:6px;
   }
 
   .ledger{
-    border-top:1px dashed rgba(255,255,255,0.2);
+    border-top:1px dashed var(--on-blue-line);
     padding-top:6px;
   }
   .ledger-row{
@@ -254,45 +305,45 @@
     align-items:baseline;
     padding:10px 0;
     font-size:15.5px;
-    border-bottom:1px dotted rgba(255,255,255,0.12);
+    border-bottom:1px dotted var(--on-blue-line);
     gap:24px;
   }
-  .ledger-row .l{color:#C7D2CF;}
+  .ledger-row .l{color:var(--on-blue);}
   .ledger-row .r{
     font-family:'IBM Plex Mono',monospace;
     font-weight:600;
-    color:var(--paper);
+    color:var(--on-blue);
     white-space:nowrap;
   }
-  .ledger-row.deduct .r{color:#E8A98F;}
+  .ledger-row.deduct .r{color:#FF9E8E;}
   .ledger-row.deduct .r::before{content:"– ";}
   .ledger-row.total{
     margin-top:8px;
     padding-top:14px;
-    border-top:1px solid rgba(255,255,255,0.25);
+    border-top:1px solid rgba(255,255,255,0.35);
     border-bottom:none;
   }
   .ledger-row.total .l{
     font-family:'Fraunces',serif;
     font-size:15px;
-    color:var(--paper);
+    color:var(--on-blue);
   }
   .ledger-row.total .r{
     font-family:'IBM Plex Mono',monospace;
     font-size:17px;
     font-weight:600;
-    color:#8FE0B4;
+    color:#6FE3B4;
   }
   .ledger-row.final .r{
     font-size:20px;
-    color:var(--gold-soft);
+    color:var(--on-blue);
   }
 
   .info-box{
     margin-top:18px;
     padding:14px 16px;
-    background:rgba(200,155,60,0.1);
-    border:1px dashed rgba(200,155,60,0.4);
+    background:rgba(255,255,255,0.10);
+    border:1px dashed rgba(255,255,255,0.30);
     border-radius:8px;
   }
   .info-box .info-title{
@@ -300,7 +351,7 @@
     font-size:10.5px;
     letter-spacing:.1em;
     text-transform:uppercase;
-    color:var(--gold-soft);
+    color:var(--on-blue);
     margin-bottom:6px;
   }
   .info-box .info-row{
@@ -308,15 +359,15 @@
     justify-content:space-between;
     font-size:13.5px;
   }
-  .info-box .info-row .l{color:#C7D2CF;}
+  .info-box .info-row .l{color:var(--on-blue);}
   .info-box .info-row .r{
     font-family:'IBM Plex Mono',monospace;
     font-weight:600;
-    color:var(--gold-soft);
+    color:var(--on-blue);
   }
   .info-box .info-note{
     font-size:11px;
-    color:#8FA19F;
+    color:var(--on-blue);
     margin-top:6px;
     line-height:1.5;
   }
@@ -324,7 +375,7 @@
   .receipt-foot{
     margin-top:26px;
     padding-top:16px;
-    border-top:1px dashed rgba(255,255,255,0.2);
+    border-top:1px dashed var(--on-blue-line);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -343,18 +394,18 @@
     font-size:9.5px;
     letter-spacing:.08em;
     text-transform:uppercase;
-    color:#7E9290;
+    color:var(--on-blue);
   }
   .foot-item .foot-value{
     font-family:'IBM Plex Mono',monospace;
     font-size:14.5px;
     font-weight:600;
-    color:var(--gold-soft);
+    color:var(--on-blue);
   }
   .foot-divider{
     width:1px;
     height:26px;
-    background:rgba(255,255,255,0.15);
+    background:var(--on-blue-line);
   }
 
   .save-btn{
@@ -365,9 +416,9 @@
     justify-content:center;
     gap:9px;
     padding:13px 16px;
-    background:var(--gold);
-    color:var(--ink);
-    border:none;
+    background:rgba(255,255,255,0.14);
+    color:var(--on-blue);
+    border:1.5px solid rgba(255,255,255,0.4);
     border-radius:9px;
     font-family:'Inter',sans-serif;
     font-weight:600;
@@ -376,14 +427,14 @@
     cursor:pointer;
     transition:background .15s, transform .1s;
   }
-  .save-btn:hover{background:var(--gold-soft);}
+  .save-btn:hover{background:rgba(255,255,255,0.24);}
   .save-btn:active{transform:scale(0.98);}
   .save-btn svg{width:16px;height:16px;flex-shrink:0;}
   .save-btn.saving{opacity:.7;cursor:progress;}
 
   footer{
     text-align:center;
-    color:#7E9290;
+    color:var(--muted);
     font-size:12px;
     margin-top:22px;
     font-family:'IBM Plex Mono',monospace;
@@ -413,7 +464,7 @@
           <label for="kur-plafond">Plafond Pinjaman</label>
           <div class="input-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="kur-plafond" inputmode="numeric" value="100.000.000">
+            <input type="text" id="kur-plafond" inputmode="numeric" value="0">
           </div>
         </div>
 
@@ -467,8 +518,14 @@
             </div>
           </div>
           <div class="field">
-            <label for="kur-notaris">Biaya Notaris</label>
-            <div class="input-shell">
+            <div class="field-head">
+              <label for="kur-notaris" style="margin-bottom:0;">Biaya Notaris</label>
+              <label class="chk-toggle">
+                <input type="checkbox" id="kur-notaris-check" checked>
+                <span>Tampilkan</span>
+              </label>
+            </div>
+            <div class="input-shell" id="kur-notaris-shell">
               <span class="prefix">Rp</span>
               <input type="text" id="kur-notaris" inputmode="numeric" value="0">
             </div>
@@ -476,16 +533,60 @@
         </div>
 
         <div class="field">
-          <label for="kur-lainlain">Potongan Lain-lain</label>
-          <div class="input-shell">
+          <div class="field-head">
+            <label for="kur-lainlain" style="margin-bottom:0;">Potongan Lain-lain</label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kur-lainlain-check" checked>
+              <span>Tampilkan</span>
+            </label>
+          </div>
+          <div class="input-shell" id="kur-lainlain-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="kur-lainlain" inputmode="numeric" value="400.000">
+            <input type="text" id="kur-lainlain" inputmode="numeric" value="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="kur-brilink" style="margin-bottom:0;">Biaya Brilink</label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kur-brilink-check">
+              <span>Tampilkan</span>
+            </label>
+          </div>
+          <div class="input-shell disabled" id="kur-brilink-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kur-brilink" inputmode="numeric" value="0" disabled>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="kur-admin">Biaya Admin <span id="kur-admin-mode">(otomatis)</span></label>
+          <div class="input-shell" id="kur-admin-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kur-admin" inputmode="numeric" value="0">
+            <button type="button" id="kur-admin-reset" title="Kembalikan ke otomatis" style="display:none;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:14px;padding:6px 10px;">↺</button>
+          </div>
+          <span class="hint">≤50jt: 50rb · &gt;50jt: 100rb. Dibayar terpisah (saldo) sebelum pencairan, tidak memotong dana diterima. Bisa diubah manual bila perlu.</span>
+        </div>
+
+        <div class="field">
+          <label style="margin-bottom:8px;">Tampilkan di Struk</label>
+          <div class="foot-toggle-group">
+            <label class="chk-toggle">
+              <input type="checkbox" id="kur-totalbayar-check" checked>
+              <span>Total Bayar Selama Tenor</span>
+            </label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kur-totalbunga-check" checked>
+              <span>Total Bunga</span>
+            </label>
           </div>
         </div>
       </div>
 
       <div class="panel panel-receipt">
-        <div id="kur-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+        <div id="kur-receipt-capture" style="background:linear-gradient(160deg, var(--receipt-bg), var(--receipt-bg2)); padding:28px 26px;">
           <div class="receipt-head">
             <span>Simulasi Kredit KUR</span>
             <span id="kur-tanggal"></span>
@@ -512,7 +613,7 @@
             </div>
 
             <div class="ledger-row deduct">
-              <span class="l">Blokiran Angsuran <span id="kur-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="l">Blokiran Angsuran <span id="kur-out-blokiran-x" style="color:var(--on-blue);"></span></span>
               <span class="r" id="kur-out-blokiran">Rp 0</span>
             </div>
             <div class="ledger-row deduct">
@@ -523,14 +624,19 @@
               <span class="l">Asuransi</span>
               <span class="r" id="kur-out-asuransi">Rp 0</span>
             </div>
-            <div class="ledger-row deduct">
+            <div class="ledger-row deduct" id="kur-notaris-row">
               <span class="l">Biaya Notaris</span>
               <span class="r" id="kur-out-notaris">Rp 0</span>
             </div>
-            <div class="ledger-row deduct">
+            <div class="ledger-row deduct" id="kur-lainlain-row">
               <span class="l">Potongan Lain-lain</span>
               <span class="r" id="kur-out-lainlain">Rp 0</span>
             </div>
+            <div class="ledger-row deduct" id="kur-brilink-row" style="display:none;">
+              <span class="l">Biaya Brilink</span>
+              <span class="r" id="kur-out-brilink">Rp 0</span>
+            </div>
+
 
             <div class="ledger-row total">
               <span class="l">Total Potongan</span>
@@ -542,13 +648,22 @@
             </div>
           </div>
 
-          <div class="receipt-foot">
-            <div class="foot-item">
+          <div class="info-box">
+            <div class="info-title">Biaya Admin KUR (di luar potongan)</div>
+            <div class="info-row">
+              <span class="l">Biaya Admin</span>
+              <span class="r" id="kur-out-admin">Rp 0</span>
+            </div>
+            <div class="info-note">Nasabah wajib menyetorkan uang sejumlah tersebut untuk biaya administrasi KUR. Biaya ini bersifat informasi dan tidak mengurangi dana yang diterima.</div>
+          </div>
+
+          <div class="receipt-foot" id="kur-receipt-foot">
+            <div class="foot-item" id="kur-totalbayar-item">
               <span class="foot-label">Total Bayar Selama Tenor</span>
               <span class="foot-value" id="kur-out-totalbayar">Rp 0</span>
             </div>
-            <div class="foot-divider"></div>
-            <div class="foot-item">
+            <div class="foot-divider" id="kur-foot-divider"></div>
+            <div class="foot-item" id="kur-totalbunga-item">
               <span class="foot-label">Total Bunga</span>
               <span class="foot-value" id="kur-out-totalbunga">Rp 0</span>
             </div>
@@ -573,7 +688,7 @@
           <label for="kup-plafond">Plafond Pinjaman</label>
           <div class="input-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="kup-plafond" inputmode="numeric" value="100.000.000">
+            <input type="text" id="kup-plafond" inputmode="numeric" value="0">
           </div>
         </div>
 
@@ -627,8 +742,14 @@
             </div>
           </div>
           <div class="field">
-            <label for="kup-notaris">Biaya Notaris</label>
-            <div class="input-shell">
+            <div class="field-head">
+              <label for="kup-notaris" style="margin-bottom:0;">Biaya Notaris</label>
+              <label class="chk-toggle">
+                <input type="checkbox" id="kup-notaris-check" checked>
+                <span>Tampilkan</span>
+              </label>
+            </div>
+            <div class="input-shell" id="kup-notaris-shell">
               <span class="prefix">Rp</span>
               <input type="text" id="kup-notaris" inputmode="numeric" value="0">
             </div>
@@ -636,10 +757,30 @@
         </div>
 
         <div class="field">
-          <label for="kup-lainlain">Potongan Lain-lain</label>
-          <div class="input-shell">
+          <div class="field-head">
+            <label for="kup-lainlain" style="margin-bottom:0;">Potongan Lain-lain</label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kup-lainlain-check" checked>
+              <span>Tampilkan</span>
+            </label>
+          </div>
+          <div class="input-shell" id="kup-lainlain-shell">
             <span class="prefix">Rp</span>
-            <input type="text" id="kup-lainlain" inputmode="numeric" value="400.000">
+            <input type="text" id="kup-lainlain" inputmode="numeric" value="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="kup-brilink" style="margin-bottom:0;">Biaya Brilink</label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kup-brilink-check">
+              <span>Tampilkan</span>
+            </label>
+          </div>
+          <div class="input-shell disabled" id="kup-brilink-shell">
+            <span class="prefix">Rp</span>
+            <input type="text" id="kup-brilink" inputmode="numeric" value="0" disabled>
           </div>
         </div>
 
@@ -653,18 +794,33 @@
             <span class="hint">Provisi = 1% × plafond pinjaman.</span>
           </div>
           <div class="field">
-            <label for="kup-admin">Biaya Admin (otomatis)</label>
-            <div class="input-shell readonly">
+            <label for="kup-admin">Biaya Admin <span id="kup-admin-mode">(otomatis)</span></label>
+            <div class="input-shell" id="kup-admin-shell">
               <span class="prefix">Rp</span>
-              <input type="text" id="kup-admin" readonly value="0">
+              <input type="text" id="kup-admin" inputmode="numeric" value="0">
+              <button type="button" id="kup-admin-reset" title="Kembalikan ke otomatis" style="display:none;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:14px;padding:6px 10px;">↺</button>
             </div>
-            <span class="hint">≤100jt: 100rb · &gt;100–250jt: 250rb · &gt;250jt: 500rb</span>
+            <span class="hint">≤100jt: 100rb · &gt;100–250jt: 250rb · &gt;250jt: 500rb. Bisa diubah manual bila perlu.</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label style="margin-bottom:8px;">Tampilkan di Struk</label>
+          <div class="foot-toggle-group">
+            <label class="chk-toggle">
+              <input type="checkbox" id="kup-totalbayar-check" checked>
+              <span>Total Bayar Selama Tenor</span>
+            </label>
+            <label class="chk-toggle">
+              <input type="checkbox" id="kup-totalbunga-check" checked>
+              <span>Total Bunga</span>
+            </label>
           </div>
         </div>
       </div>
 
       <div class="panel panel-receipt">
-        <div id="kup-receipt-capture" style="background:var(--ink); padding:28px 26px;">
+        <div id="kup-receipt-capture" style="background:linear-gradient(160deg, var(--receipt-bg), var(--receipt-bg2)); padding:28px 26px;">
           <div class="receipt-head">
             <span>Simulasi Kredit Kupedes</span>
             <span id="kup-tanggal"></span>
@@ -691,7 +847,7 @@
             </div>
 
             <div class="ledger-row deduct">
-              <span class="l">Blokiran Angsuran <span id="kup-out-blokiran-x" style="color:#8FA19F;"></span></span>
+              <span class="l">Blokiran Angsuran <span id="kup-out-blokiran-x" style="color:var(--on-blue);"></span></span>
               <span class="r" id="kup-out-blokiran">Rp 0</span>
             </div>
             <div class="ledger-row deduct">
@@ -702,13 +858,17 @@
               <span class="l">Asuransi</span>
               <span class="r" id="kup-out-asuransi">Rp 0</span>
             </div>
-            <div class="ledger-row deduct">
+            <div class="ledger-row deduct" id="kup-notaris-row">
               <span class="l">Biaya Notaris</span>
               <span class="r" id="kup-out-notaris">Rp 0</span>
             </div>
-            <div class="ledger-row deduct">
+            <div class="ledger-row deduct" id="kup-lainlain-row">
               <span class="l">Potongan Lain-lain</span>
               <span class="r" id="kup-out-lainlain">Rp 0</span>
+            </div>
+            <div class="ledger-row deduct" id="kup-brilink-row" style="display:none;">
+              <span class="l">Biaya Brilink</span>
+              <span class="r" id="kup-out-brilink">Rp 0</span>
             </div>
             <div class="ledger-row deduct">
               <span class="l">Provisi (1%)</span>
@@ -738,13 +898,13 @@
             <div class="info-note">AJKO = Angsuran × 1,02% × Jangka Waktu. Biaya ini bersifat informasi dan tidak mengurangi dana yang diterima.</div>
           </div>
 
-          <div class="receipt-foot">
-            <div class="foot-item">
+          <div class="receipt-foot" id="kup-receipt-foot">
+            <div class="foot-item" id="kup-totalbayar-item">
               <span class="foot-label">Total Bayar Selama Tenor</span>
               <span class="foot-value" id="kup-out-totalbayar">Rp 0</span>
             </div>
-            <div class="foot-divider"></div>
-            <div class="foot-item">
+            <div class="foot-divider" id="kup-foot-divider"></div>
+            <div class="foot-item" id="kup-totalbunga-item">
               <span class="foot-label">Total Bunga</span>
               <span class="foot-value" id="kup-out-totalbunga">Rp 0</span>
             </div>
@@ -796,9 +956,54 @@
   }
 
   /* ---------- KUR ---------- */
-  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-notaris','kur-lainlain'].forEach(id=>setupMoneyInput(id, calcKur));
+  ['kur-plafond','kur-pelunasan','kur-asuransi','kur-notaris','kur-lainlain','kur-brilink'].forEach(id=>setupMoneyInput(id, calcKur));
   ['kur-tenor','kur-bunga','kur-blokiran'].forEach(id=>{
     document.getElementById(id).addEventListener('input', calcKur);
+  });
+
+  // Toggle aktif/nonaktif untuk Biaya Notaris & Potongan Lain-lain
+  function setupFieldToggle(checkId, shellId, inputId){
+    const check = document.getElementById(checkId);
+    const shell = document.getElementById(shellId);
+    const input = document.getElementById(inputId);
+    const apply = ()=>{
+      const on = check.checked;
+      shell.classList.toggle('disabled', !on);
+      input.disabled = !on;
+    };
+    check.addEventListener('change', ()=>{ apply(); calcKur(); });
+    apply();
+  }
+  setupFieldToggle('kur-notaris-check','kur-notaris-shell','kur-notaris');
+  setupFieldToggle('kur-lainlain-check','kur-lainlain-shell','kur-lainlain');
+  setupFieldToggle('kur-brilink-check','kur-brilink-shell','kur-brilink');
+
+  // Toggle tampil/sembunyi Total Bayar Selama Tenor & Total Bunga di struk
+  document.getElementById('kur-totalbayar-check').addEventListener('change', calcKur);
+  document.getElementById('kur-totalbunga-check').addEventListener('change', calcKur);
+
+  function hitungAdminKur(plafond){
+    return plafond <= 50000000 ? 50000 : 100000;
+  }
+
+  // Biaya Admin KUR: otomatis by default, tapi bisa diedit manual oleh user.
+  let kurAdminIsManual = false;
+  const kurAdminInput = document.getElementById('kur-admin');
+  const kurAdminModeLabel = document.getElementById('kur-admin-mode');
+  const kurAdminResetBtn = document.getElementById('kur-admin-reset');
+
+  setupMoneyInput('kur-admin', ()=>{
+    kurAdminIsManual = true;
+    kurAdminModeLabel.textContent = '(manual)';
+    kurAdminResetBtn.style.display = 'inline-block';
+    calcKur();
+  });
+
+  kurAdminResetBtn.addEventListener('click', ()=>{
+    kurAdminIsManual = false;
+    kurAdminModeLabel.textContent = '(otomatis)';
+    kurAdminResetBtn.style.display = 'none';
+    calcKur();
   });
 
   function calcKur(){
@@ -808,8 +1013,16 @@
     const blokiranX = parseInt(document.getElementById('kur-blokiran').value) || 0;
     const pelunasan = parseNum(document.getElementById('kur-pelunasan').value);
     const asuransi = parseNum(document.getElementById('kur-asuransi').value);
-    const notaris = parseNum(document.getElementById('kur-notaris').value);
-    const lainlain = parseNum(document.getElementById('kur-lainlain').value);
+    const notarisOn = document.getElementById('kur-notaris-check').checked;
+    const lainlainOn = document.getElementById('kur-lainlain-check').checked;
+    const brilinkOn = document.getElementById('kur-brilink-check').checked;
+    const notaris = notarisOn ? parseNum(document.getElementById('kur-notaris').value) : 0;
+    const lainlain = lainlainOn ? parseNum(document.getElementById('kur-lainlain').value) : 0;
+    const brilink = brilinkOn ? parseNum(document.getElementById('kur-brilink').value) : 0;
+
+    document.getElementById('kur-notaris-row').style.display = notarisOn ? '' : 'none';
+    document.getElementById('kur-lainlain-row').style.display = lainlainOn ? '' : 'none';
+    document.getElementById('kur-brilink-row').style.display = brilinkOn ? '' : 'none';
 
     const iBulan = (bungaTahun/100)/12;
     let angsuran = 0;
@@ -817,8 +1030,13 @@
       angsuran = (iBulan === 0) ? (plafond/tenor) : (plafond * iBulan / (1 - Math.pow(1+iBulan, -tenor)));
     }
 
+    const admin = kurAdminIsManual ? parseNum(kurAdminInput.value) : hitungAdminKur(plafond);
+    if(!kurAdminIsManual){
+      kurAdminInput.value = formatRibuan(String(Math.round(admin)));
+    }
+
     const blokiran = angsuran * blokiranX;
-    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain;
+    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain + brilink;
     const diterima = plafond - totalPotongan;
     const totalBayar = angsuran * tenor;
     const totalBunga = totalBayar - plafond;
@@ -834,23 +1052,73 @@
     document.getElementById('kur-out-asuransi').textContent = formatRp(asuransi);
     document.getElementById('kur-out-notaris').textContent = formatRp(notaris);
     document.getElementById('kur-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kur-out-brilink').textContent = formatRp(brilink);
+    document.getElementById('kur-out-admin').textContent = formatRp(admin);
     document.getElementById('kur-out-totalpotongan').textContent = formatRp(totalPotongan);
     document.getElementById('kur-out-diterima').textContent = formatRp(diterima);
     document.getElementById('kur-out-totalbayar').textContent = formatRp(totalBayar);
     document.getElementById('kur-out-totalbunga').textContent = formatRp(totalBunga);
+
+    const totalbayarOnKur = document.getElementById('kur-totalbayar-check').checked;
+    const totalbungaOnKur = document.getElementById('kur-totalbunga-check').checked;
+    document.getElementById('kur-totalbayar-item').style.display = totalbayarOnKur ? '' : 'none';
+    document.getElementById('kur-totalbunga-item').style.display = totalbungaOnKur ? '' : 'none';
+    document.getElementById('kur-foot-divider').style.display = (totalbayarOnKur && totalbungaOnKur) ? '' : 'none';
+    document.getElementById('kur-receipt-foot').style.display = (totalbayarOnKur || totalbungaOnKur) ? '' : 'none';
   }
 
   /* ---------- KUPEDES ---------- */
-  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-notaris','kup-lainlain'].forEach(id=>setupMoneyInput(id, calcKup));
+  ['kup-plafond','kup-pelunasan','kup-asuransi','kup-notaris','kup-lainlain','kup-brilink'].forEach(id=>setupMoneyInput(id, calcKup));
   ['kup-tenor','kup-bunga','kup-blokiran'].forEach(id=>{
     document.getElementById(id).addEventListener('input', calcKup);
   });
+
+  // Toggle aktif/nonaktif untuk Biaya Notaris & Potongan Lain-lain
+  function setupFieldToggleKup(checkId, shellId, inputId){
+    const check = document.getElementById(checkId);
+    const shell = document.getElementById(shellId);
+    const input = document.getElementById(inputId);
+    const apply = ()=>{
+      const on = check.checked;
+      shell.classList.toggle('disabled', !on);
+      input.disabled = !on;
+    };
+    check.addEventListener('change', ()=>{ apply(); calcKup(); });
+    apply();
+  }
+  setupFieldToggleKup('kup-notaris-check','kup-notaris-shell','kup-notaris');
+  setupFieldToggleKup('kup-lainlain-check','kup-lainlain-shell','kup-lainlain');
+  setupFieldToggleKup('kup-brilink-check','kup-brilink-shell','kup-brilink');
+
+  // Toggle tampil/sembunyi Total Bayar Selama Tenor & Total Bunga di struk
+  document.getElementById('kup-totalbayar-check').addEventListener('change', calcKup);
+  document.getElementById('kup-totalbunga-check').addEventListener('change', calcKup);
 
   function hitungAdmin(plafond){
     if(plafond <= 100000000) return 100000;
     if(plafond <= 250000000) return 250000;
     return 500000;
   }
+
+  // Biaya Admin: otomatis by default, tapi bisa diedit manual oleh user.
+  let adminIsManual = false;
+  const adminInput = document.getElementById('kup-admin');
+  const adminModeLabel = document.getElementById('kup-admin-mode');
+  const adminResetBtn = document.getElementById('kup-admin-reset');
+
+  setupMoneyInput('kup-admin', ()=>{
+    adminIsManual = true;
+    adminModeLabel.textContent = '(manual)';
+    adminResetBtn.style.display = 'inline-block';
+    calcKup();
+  });
+
+  adminResetBtn.addEventListener('click', ()=>{
+    adminIsManual = false;
+    adminModeLabel.textContent = '(otomatis)';
+    adminResetBtn.style.display = 'none';
+    calcKup();
+  });
 
   function calcKup(){
     const plafond = parseNum(document.getElementById('kup-plafond').value);
@@ -859,8 +1127,16 @@
     const blokiranX = parseInt(document.getElementById('kup-blokiran').value) || 0;
     const pelunasan = parseNum(document.getElementById('kup-pelunasan').value);
     const asuransi = parseNum(document.getElementById('kup-asuransi').value);
-    const notaris = parseNum(document.getElementById('kup-notaris').value);
-    const lainlain = parseNum(document.getElementById('kup-lainlain').value);
+    const notarisOn = document.getElementById('kup-notaris-check').checked;
+    const lainlainOn = document.getElementById('kup-lainlain-check').checked;
+    const brilinkOn = document.getElementById('kup-brilink-check').checked;
+    const notaris = notarisOn ? parseNum(document.getElementById('kup-notaris').value) : 0;
+    const lainlain = lainlainOn ? parseNum(document.getElementById('kup-lainlain').value) : 0;
+    const brilink = brilinkOn ? parseNum(document.getElementById('kup-brilink').value) : 0;
+
+    document.getElementById('kup-notaris-row').style.display = notarisOn ? '' : 'none';
+    document.getElementById('kup-lainlain-row').style.display = lainlainOn ? '' : 'none';
+    document.getElementById('kup-brilink-row').style.display = brilinkOn ? '' : 'none';
 
     const iBulan = (bungaTahun/100)/12;
     let angsuran = 0;
@@ -869,13 +1145,15 @@
     }
 
     const provisi = plafond * 0.01;
-    const admin = hitungAdmin(plafond);
+    const admin = adminIsManual ? parseNum(adminInput.value) : hitungAdmin(plafond);
 
     document.getElementById('kup-provisi').value = formatRibuan(String(Math.round(provisi)));
-    document.getElementById('kup-admin').value = formatRibuan(String(Math.round(admin)));
+    if(!adminIsManual){
+      adminInput.value = formatRibuan(String(Math.round(admin)));
+    }
 
     const blokiran = angsuran * blokiranX;
-    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain + provisi + admin;
+    const totalPotongan = blokiran + pelunasan + asuransi + notaris + lainlain + brilink + provisi + admin;
     const diterima = plafond - totalPotongan;
     const totalBayar = angsuran * tenor;
     const totalBunga = totalBayar - plafond;
@@ -893,6 +1171,7 @@
     document.getElementById('kup-out-asuransi').textContent = formatRp(asuransi);
     document.getElementById('kup-out-notaris').textContent = formatRp(notaris);
     document.getElementById('kup-out-lainlain').textContent = formatRp(lainlain);
+    document.getElementById('kup-out-brilink').textContent = formatRp(brilink);
     document.getElementById('kup-out-provisi').textContent = formatRp(provisi);
     document.getElementById('kup-out-admin').textContent = formatRp(admin);
     document.getElementById('kup-out-totalpotongan').textContent = formatRp(totalPotongan);
@@ -900,6 +1179,13 @@
     document.getElementById('kup-out-totalbayar').textContent = formatRp(totalBayar);
     document.getElementById('kup-out-totalbunga').textContent = formatRp(totalBunga);
     document.getElementById('kup-out-ajko').textContent = formatRp(ajko);
+
+    const totalbayarOn = document.getElementById('kup-totalbayar-check').checked;
+    const totalbungaOn = document.getElementById('kup-totalbunga-check').checked;
+    document.getElementById('kup-totalbayar-item').style.display = totalbayarOn ? '' : 'none';
+    document.getElementById('kup-totalbunga-item').style.display = totalbungaOn ? '' : 'none';
+    document.getElementById('kup-foot-divider').style.display = (totalbayarOn && totalbungaOn) ? '' : 'none';
+    document.getElementById('kup-receipt-foot').style.display = (totalbayarOn || totalbungaOn) ? '' : 'none';
   }
 
   /* ---------- shared ---------- */
@@ -924,7 +1210,7 @@
     const naturalWidth = target.offsetWidth;
 
     html2canvas(target, {
-      backgroundColor: '#122C34',
+      backgroundColor: '#0A5FD1',
       scale: 2,
       useCORS: true,
       windowWidth: naturalWidth + 200,
